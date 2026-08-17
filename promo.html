@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>数据知识产权协商估值引擎</title>
+<style>
+  :root{
+    --primary:#0b5c8a;--primary-d:#08435f;--accent:#0fa3a3;--bg:#f5f8fa;
+    --card:#ffffff;--text:#1c2b33;--sub:#5a7079;--line:#e3ebf0;--ok:#1a9e57;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  body{margin:0;font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+    background:var(--bg);color:var(--text);line-height:1.6;font-size:16px;}
+  .wrap{max-width:480px;margin:0 auto;padding:0 16px 40px;}
+  .topbar{background:linear-gradient(135deg,var(--primary),var(--accent));color:#fff;
+    text-align:center;padding:10px;font-size:13px;letter-spacing:2px;}
+  .hero{padding:30px 4px 22px;text-align:center;}
+  .hero h1{font-size:25px;margin:0 0 10px;color:var(--primary-d);font-weight:800;line-height:1.35;}
+  .hero .sub{color:var(--sub);font-size:14px;}
+  .badge{display:inline-block;background:#e8f4f4;color:var(--accent);font-size:12px;
+    padding:3px 10px;border-radius:20px;margin-top:12px;font-weight:600;}
+  .sec{background:var(--card);border-radius:14px;padding:18px 16px;margin:14px 0;
+    box-shadow:0 2px 10px rgba(20,60,90,.06);}
+  .sec h2{font-size:18px;margin:0 0 12px;color:var(--primary-d);display:flex;align-items:center;gap:8px;}
+  .sec h2 .n{background:var(--primary);color:#fff;width:24px;height:24px;border-radius:50%;
+    display:inline-flex;align-items:center;justify-content:center;font-size:13px;flex:none;}
+  .pain{display:flex;gap:10px;align-items:flex-start;margin:10px 0;font-size:14px;color:var(--sub);}
+  .pain .ic{font-size:18px;flex:none;}
+  .layer{border-left:4px solid var(--accent);padding:8px 0 8px 12px;margin:12px 0;}
+  .layer .t{font-weight:700;color:var(--text);font-size:15px;}
+  .layer .d{font-size:13px;color:var(--sub);margin-top:3px;}
+  .case{background:linear-gradient(135deg,#f0f9ff,#e8f4f4);border-radius:12px;padding:16px;
+    text-align:center;margin:12px 0;}
+  .case .big{font-size:34px;font-weight:800;color:var(--primary);}
+  .case .lbl{font-size:13px;color:var(--sub);margin-top:4px;}
+  .case .src{font-size:12px;color:var(--ok);margin-top:8px;font-weight:600;}
+  .policy{font-size:14px;color:var(--text);background:#fff8e8;border-left:4px solid #f0a500;
+    padding:12px 12px;border-radius:0 10px 10px 0;}
+  .open{font-size:14px;color:var(--sub);text-align:center;margin:10px 0;}
+  .open b{color:var(--primary-d);}
+  .qr{text-align:center;margin:16px 0 8px;}
+  .qr img{width:180px;height:180px;border:1px solid var(--line);border-radius:12px;background:#fff;padding:8px;}
+  .qr .tip{font-size:12px;color:var(--sub);margin-top:8px;}
+  .btns{display:flex;gap:10px;margin:14px 0;}
+  .btn{flex:1;text-align:center;padding:13px 0;border-radius:12px;font-weight:700;font-size:15px;
+    text-decoration:none;display:block;}
+  .btn.primary{background:var(--primary);color:#fff;}
+  .btn.ghost{background:#fff;color:var(--primary);border:1.5px solid var(--primary);}
+  .footer{text-align:center;font-size:12px;color:var(--sub);margin-top:18px;line-height:1.8;}
+  .footer b{color:var(--text);}
+</style>
+</head>
+<body>
+  <div class="topbar">开源 · 免费 · 白盒可解释 · 合规可审计</div>
+  <div class="wrap">
+    <div class="hero">
+      <h1>数据知识产权<br>协商估值引擎</h1>
+      <div class="sub">基于德阳市市场监督管理局<br>发布的 L1+L2+L3 三层标准估值模型</div>
+      <div class="badge">国内首个开源实现 · MIT License</div>
+    </div>
+
+    <div class="sec">
+      <h2><span class="n">!</span>数据资产，到底值多少钱？</h2>
+      <div class="pain"><span class="ic">🚫</span><div><b>没有统一标准</b>——同一份数据，不同机构估值差几倍</div></div>
+      <div class="pain"><span class="ic">🤝</span><div><b>协商无依据</b>——买卖双方各说各话，谈不拢</div></div>
+      <div class="pain"><span class="ic">💰</span><div><b>评估成本高</b>——传统评估机构收费动辄数万，中小主体用不起</div></div>
+    </div>
+
+    <div class="sec">
+      <h2><span class="n">✓</span>三层模型，白盒可解释</h2>
+      <div class="layer">
+        <div class="t">L1 · 成本法公式</div>
+        <div class="d">A = a + (d+e)×b + a×c，把"投入成本"算成"基准估值"，每一步都摊开给人看</div>
+      </div>
+      <div class="layer">
+        <div class="t">L2 · 系数智能推荐</div>
+        <div class="d">按加工难度、应用场景自动给出 b / c 系数范围，双方协商有抓手</div>
+      </div>
+      <div class="layer">
+        <div class="t">L3 · 收益法交叉验证</div>
+        <div class="d">与中评协收益法评估值自动比对，偏差一目了然，防止拍脑袋</div>
+      </div>
+    </div>
+
+    <div class="case">
+      <div class="big">98.8 万</div>
+      <div class="lbl">真实落地估值案例</div>
+      <div class="src">✓ 德阳市数据交易公司已在真实业务中使用</div>
+    </div>
+
+    <div class="sec">
+      <h2><span class="n">⚡</span>政策东风</h2>
+      <div class="policy">国家数据局正在全国推进<b>数据知识产权登记</b>。登记要有"价值依据"，本工具正好补上这块空白——合规、可审计、拿来就能用。</div>
+    </div>
+
+    <div class="sec">
+      <h2><span class="n">★</span>开源 · 免费 · 可二次开发</h2>
+      <div class="open">代码完全公开（<b>MIT</b> 协议），医疗 / 政务 / 金融 / 数据交易所<br>都能拿去改、拿去用，不花一分钱。</div>
+      <div class="qr">
+        <img src="qrcode.png" alt="扫码体验">
+        <div class="tip">▲ 扫码在手机上打开本页 / 体验估值引擎</div>
+      </div>
+      <div class="btns">
+        <a class="btn primary" href="https://guolliu1033.github.io/data-ip-valuation-engine/">打开估值引擎</a>
+        <a class="btn ghost" href="https://github.com/guolliu1033/data-ip-valuation-engine">看源代码</a>
+      </div>
+    </div>
+
+    <div class="footer">
+      <b>德阳市数据交易公司</b><br>
+      数据要素价值释放 · 数据知识产权估值工具<br>
+      GitHub: guolliu1033 / data-ip-valuation-engine
+    </div>
+  </div>
+</body>
+</html>
