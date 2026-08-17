@@ -63,3 +63,9 @@ MIT License - 可自由使用、修改和商业化。
 
 - 德阳市数据交易公司
 - GitHub: https://github.com/guolliu1033
+
+## 🗺️ Roadmap
+
+功能迭代与已知限制见 [roadmap.md](./roadmap.md)。
+
+当前规划：v1.1 多案例对比与批量导出、v1.2 合规确认书（PDF）、v2.0 开放 API 与 Codex PR 审查工作流。欢迎提 Issue / PR 参与。
