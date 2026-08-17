@@ -19,7 +19,7 @@
 | 7 | Why does this repository qualify? | 见下方【文本 A】 |
 | 8 | I'm interested in... | ☑ Codex Security + ☑ API credits for my project |
 | 9 | OpenAI Organization ID | org-9hXk1RIQ5k4TzYx0wCjOK3dU |
-| 10 | How will you use API credits? | 见下方【文本 B】 |
+| 10 | How will you use API credits? | 见下方【文本 B】——**核心用途=AI 评估复杂度/市场价值系数（申请的主要理由）** |
 | 11 | Anything else we should know? | 见下方【文本 C】 |
 
 ---
@@ -30,13 +30,13 @@
 
 data-ip-valuation-engine is the first open-source implementation of China's Data Intellectual Property valuation framework (德阳市市场监督局 L1+L2+L3 model). No equivalent tool exists in the OSS ecosystem. The project is actively used by 德阳市数据交易公司 (Sichuan's only operating data trading platform) for real commercial valuations — e.g., the 98.8万元 landmark case. China's National Data Bureau is rolling out data IP registration nationwide; this tool fills a gap where no OSS alternative exists. I am the primary maintainer, responsible for feature development, issue triage, and aligning the engine with evolving regulatory standards.
 
-### 文本 B — How will you use API credits?（约 495 字符）
+### 文本 B — How will you use API credits?（约 490 字符）⭐核心用途
 
-Use Codex to automate PR review: when a PR is submitted, Codex generates a summary of changes, checks regulatory formula alignment (L1/L2/L3 coefficients must match published standards), and flags coefficient drift. Maintainer confirms before merge. Also automate release notes generation and issue triage (label valuation-formula vs UI vs docs). Track: PRs reviewed/month, coefficient-check pass rate, triage accuracy.
+Core use: AI-assisted coefficient recommendation. The engine's differentiator is using Codex/GPT to evaluate two valuation coefficients from China's data-IP framework — processing-complexity (b) from pipeline descriptions, and market-value (c) from data-asset profiles + policy text. The model returns a coefficient range plus a reasoning chain (which policy / comparable case it cites), satisfying regulatory explainability. This runs per valuation and consumes inference continuously. Secondary: Codex PR review to flag coefficient drift vs published standards. Track: valuations assisted / month, coefficient-check pass rate.
 
 ### 文本 C — Anything else we should know?（约 480 字符）
 
-This project serves China's emerging data-IP ecosystem — a niche with massive policy momentum but near-zero OSS tooling. GitHub stars are low because the audience (regulators, data exchanges, IP attorneys) is not the typical GitHub developer. Adoption is better measured by institutional use (data trading platforms, market supervision bureaus) than by developer stars. I'm committed to long-term maintenance as this regulatory framework expands nationwide.
+This project serves China's emerging data-IP ecosystem — a niche with massive policy momentum but near-zero OSS tooling. GitHub stars are low because the audience (regulators, data exchanges, IP attorneys) is not the typical GitHub developer. Adoption is better measured by institutional use than by stars. The AI-assisted coefficient evaluation (especially market-value c) is the core reason I'm requesting API credits — it's the engine's main innovation and runs inference per valuation. I'm committed to long-term maintenance as this framework expands nationwide.
 
 ---
 
@@ -72,6 +72,7 @@ This project serves China's emerging data-IP ecosystem — a niche with massive 
 | 项目使用量 | ⭐⭐ | 有真实业务使用（德阳数据交易公司），无 star/下载 |
 | 生态重要性 | ⭐⭐⭐⭐ | 首创性 + 政策空白赛道，最强点 |
 | 维护活跃度 | ⭐ | 仓库刚建、无 PR/Issue 历史 |
-| **综合** | **30-40%** | 差异化赛道是机会，仓库太新是硬伤 |
+| **资源用途契合度** | **⭐⭐⭐⭐** | AI 评估系数=核心创新且持续耗推理，与 Codex for OSS 宗旨高度吻合 |
+| **综合** | **35-45%** | 差异化赛道 + 强资源用途叙事是机会，仓库太新是硬伤 |
 
 **策略**：先申请（滚动审核无截止，早申排位前）+ 同步养活跃度。申请成本仅为填表，被拒不亏。
