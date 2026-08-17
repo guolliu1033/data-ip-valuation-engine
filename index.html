@@ -187,6 +187,31 @@ input[type="range"] {
   border-top: 1px solid var(--border);
 }
 .footer a { color: var(--primary); text-decoration: none; }
+
+/* Help panel */
+.help-panel {
+  background: #fff; border: 1px solid var(--border);
+  border-radius: var(--radius); box-shadow: var(--shadow);
+  padding: 0; margin-bottom: 20px; overflow: hidden;
+}
+.help-panel summary {
+  cursor: pointer; padding: 14px 20px; font-size: 14px; font-weight: 700;
+  color: var(--primary); background: var(--primary-light);
+  user-select: none; list-style: none;
+}
+.help-panel summary::-webkit-details-marker { display: none; }
+.help-panel summary::before { content: '\1F4D6  '; }
+.help-panel .help-body { padding: 16px 24px; font-size: 13px; line-height: 1.85; color: var(--text-secondary); }
+.help-panel .help-body h4 { font-size: 13px; margin: 14px 0 4px; color: var(--text); }
+.help-panel .help-body code { background: var(--primary-light); padding: 1px 5px; border-radius: 3px; font-family: var(--font-mono); font-size: 12px; color: var(--primary); }
+.help-panel .help-body ul { padding-left: 20px; }
+.help-panel .help-body li { margin: 4px 0; }
+.help-panel .formula {
+  background: #fff; border: 1px dashed var(--border); border-radius: 6px;
+  padding: 12px 14px; font-family: var(--font-mono); font-size: 15px;
+  text-align: center; margin: 8px 0; color: var(--primary); font-weight: 700;
+}
+.help-panel .help-body strong { color: var(--text); }
 </style>
 </head>
 <body>
@@ -198,6 +223,43 @@ input[type="range"] {
     <div class="subtitle">基于《德阳市数据知识产权协商估值指南（试行）》｜L1 公式计算 + L2 系数推荐 + L3 交叉验证</div>
     <div class="badge">德市监函〔2025〕42号 · 标准方法</div>
   </div>
+
+  <!-- Help panel -->
+  <details class="help-panel" open>
+    <summary>使用说明：怎么填、每个参数什么意思</summary>
+    <div class="help-body">
+      <h4>这是什么</h4>
+      <p>本工具基于《德阳市数据知识产权协商估值指南（试行）》（德市监函〔2025〕42号）的<strong>成本法协商估值</strong>方法，帮助权利方与相对方对数据知识产权快速测算、协商一个双方认可的估值。所有金额单位均为 <strong>万元</strong>。</p>
+
+      <h4>核心公式（L1）</h4>
+      <div class="formula">A = a + (d + e) × b + a × c</div>
+      <ul>
+        <li><code>a</code> 审定直接投入成本 = 数据购买 + 必要劳务 + 必要设备</li>
+        <li><code>d</code> 必要设备成本，<code>e</code> 必要劳务成本，<code>d+e</code> 即加工必要成本</li>
+        <li><code>b</code> 加工难度系数（L2 推荐），<code>c</code> 应用场景价值系数（L2 推荐）</li>
+      </ul>
+
+      <h4>三层结构怎么用</h4>
+      <ul>
+        <li><strong>L0 成本输入</strong>：填 a 的三项构成（数据购买 / 劳务 / 设备），系统自动汇总为 a</li>
+        <li><strong>L2 系数推荐</strong>：填运算流程数、判定条件数 → 自动判定难度等级并给 b 的范围；选应用场景等级 → 给 c 的范围。系数可在范围内由双方协商微调</li>
+        <li><strong>L3 交叉验证</strong>：填第三方收益法评估值，系统自动算偏差%。≤5% 绿色可信，5–15% 黄色建议复核，&gt;15% 红色需重新商定</li>
+      </ul>
+
+      <h4>数据从哪来</h4>
+      <ul>
+        <li>成本数据由权利方提供、双方共同审定</li>
+        <li>收益法评估值来自中评协备案的资产评估机构报告，仅用于结果校验</li>
+        <li>点「加载真实案例」可一键填入省人民医院×扬子江（98.8万）全套参数作参照</li>
+      </ul>
+
+      <h4>注意</h4>
+      <ul>
+        <li>系数 b、c 在系统推荐<strong>范围内</strong>由双方协商确定，不是系统自动给出唯一值</li>
+        <li>本工具为协商辅助，最终估值以双方签署的确认书为准</li>
+      </ul>
+    </div>
+  </details>
 
   <!-- Case button -->
   <div class="btn-row">
@@ -216,14 +278,17 @@ input[type="range"] {
         <div class="form-group">
           <label>数据购买成本（万元）</label>
           <input type="number" id="cost-data" value="0" min="0" step="0.1" oninput="recalc()">
+          <div class="hint">权利方获取原始数据支付的费用（采购 / 授权 / 许可）。自有数据填 0</div>
         </div>
         <div class="form-group">
           <label>必要劳务成本 e（万元）</label>
           <input type="number" id="cost-labor" value="6" min="0" step="0.1" oninput="recalc()">
+          <div class="hint">数据加工、清洗、标注、脱敏等环节的人工成本</div>
         </div>
         <div class="form-group">
           <label>必要设备成本 d（万元）</label>
           <input type="number" id="cost-equip" value="20" min="0" step="0.1" oninput="recalc()">
+          <div class="hint">算力、服务器、专用软件、存储等直接设备折旧或租赁费</div>
         </div>
       </div>
       <div class="form-group">
@@ -236,12 +301,12 @@ input[type="range"] {
         <div class="form-group">
           <label>运算流程数</label>
           <input type="number" id="flow-count" value="2" min="1" max="20" oninput="recalcB();recalc()">
-          <div class="hint">低难度≤2；中难度≤4；高难度>4</div>
+          <div class="hint">数据从原始态到可用态经过的处理步骤数（如采集→脱敏→标准化→质检）。低≤2｜中≤4｜高&gt;4</div>
         </div>
         <div class="form-group">
           <label>判定条件数</label>
           <input type="number" id="cond-count" value="3" min="1" max="30" oninput="recalcB();recalc()">
-          <div class="hint">低难度≤3；中难度≤6；高难度>6</div>
+          <div class="hint">加工逻辑中的规则 / 条件分支数（如异常判定、字段映射）。低≤3｜中≤6｜高&gt;6</div>
         </div>
       </div>
       <div class="form-group">
@@ -255,6 +320,7 @@ input[type="range"] {
           <input type="range" id="b-slider" value="1.4" min="0.1" max="10" step="0.1" oninput="syncSlider()">
           <span class="val" id="b-val">1.4</span>
         </div>
+        <div class="hint">在上方推荐范围内，双方根据加工复杂度协商确定；可拖动微调</div>
       </div>
 
       <div class="section-title">L2 系数推荐 — 应用场景价值系数 c</div>
@@ -265,6 +331,7 @@ input[type="range"] {
           <option value="great">很好 — 明显促进流程/模式优化或明显促进决策效率提升</option>
           <option value="superb" selected>特好 — 显著促进流程优化并显著促进决策效率提升</option>
         </select>
+        <div class="hint">按制度三档选择：好=促进；很好=明显促进；特好=显著促进（流程优化 + 决策效率）</div>
       </div>
       <div class="form-group">
         <label>应用场景价值系数 c（手动微调）</label>
@@ -272,7 +339,7 @@ input[type="range"] {
           <input type="range" id="c-slider" value="1.4" min="0.1" max="15" step="0.1" oninput="syncSlider()">
           <span class="val" id="c-val">1.4</span>
         </div>
-        <div class="hint"><span id="c-range-label">系数范围：2 &lt; c ≤ 5</span></div>
+        <div class="hint"><span id="c-range-label">系数范围：2 &lt; c ≤ 5</span>，范围内由双方协商确定</div>
       </div>
     </div>
 
@@ -299,7 +366,7 @@ input[type="range"] {
 
       <div class="section-title">L3 交叉验证 — 收益法对照</div>
       <div class="form-group">
-        <label>收益法评估值（万元）<span class="hint">来自中评协报告或可比案例</span></label>
+        <label>收益法评估值（万元）<span class="hint">来自中评协备案评估机构报告，用于交叉验证</span></label>
         <input type="number" id="income-val" value="97.0" min="0" step="0.1" oninput="recalc()">
       </div>
       <div id="cv-indicator">
@@ -483,7 +550,7 @@ function loadCase() {
   document.getElementById('cond-count').value = 3;
   document.getElementById('b-slider').value = 1.4;
   document.getElementById('c-slider').value = 1.4;
-  document.getElementById('scene-level').value = 'superb'; // 特好, c=1.4 would not be "特好" in the table logic, but this is the case
+  document.getElementById('scene-level').value = 'good'; // c=1.4 落在"好"(c≤2)档，加载后精确复现 98.8万
   document.getElementById('income-val').value = 97.0;
   recalcB();
   recalcC();
