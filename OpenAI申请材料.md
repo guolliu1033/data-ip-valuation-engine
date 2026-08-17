@@ -26,17 +26,17 @@
 
 ## 二、三个说明文本（英文，限制在 500 字符内）
 
-### 文本 A — Why does this repository qualify?（约 490 字符）
+### 文本 A — Why does this repository qualify?（实测 428 字符 ✅）
 
-data-ip-valuation-engine is the first open-source implementation of China's Data Intellectual Property valuation framework (德阳市市场监督局 L1+L2+L3 model). No equivalent tool exists in the OSS ecosystem. The project is actively used by 德阳市数据交易公司 (Sichuan's only operating data trading platform) for real commercial valuations — e.g., the 98.8万元 landmark case. China's National Data Bureau is rolling out data IP registration nationwide; this tool fills a gap where no OSS alternative exists. I am the primary maintainer, responsible for feature development, issue triage, and aligning the engine with evolving regulatory standards.
+First open-source implementation of China's Data IP valuation framework (Deyang L1+L2+L3 model) — no OSS equivalent exists. Actively used by Deyang Data Exchange (Sichuan's only operating trading platform), incl. the 98.8万元 landmark case. China's National Data Bureau is scaling data-IP registration nationwide; this tool fills a gap with no alternative. I am the primary maintainer, owning development and regulatory alignment.
 
-### 文本 B — How will you use API credits?（约 490 字符）⭐核心用途
+### 文本 B — How will you use API credits?（实测 478 字符 ✅）⭐核心用途
 
-Core use: AI-assisted coefficient recommendation. The engine's differentiator is using Codex/GPT to evaluate two valuation coefficients from China's data-IP framework — processing-complexity (b) from pipeline descriptions, and market-value (c) from data-asset profiles + policy text. The model returns a coefficient range plus a reasoning chain (which policy / comparable case it cites), satisfying regulatory explainability. This runs per valuation and consumes inference continuously. Secondary: Codex PR review to flag coefficient drift vs published standards. Track: valuations assisted / month, coefficient-check pass rate.
+Core use: AI-assisted coefficient recommendation. The engine uses Codex/GPT to evaluate two coefficients of China's data-IP framework — processing-complexity (b) from pipeline descriptions, and market-value (c) from data-asset profiles + policy text. The model returns a coefficient range plus a reasoning chain (citing policy/comparable case) for regulatory explainability. Runs per valuation, consuming inference continuously. Secondary: Codex PR review for coefficient drift.
 
-### 文本 C — Anything else we should know?（约 480 字符）
+### 文本 C — Anything else we should know?（实测 488 字符 ✅）
 
-This project serves China's emerging data-IP ecosystem — a niche with massive policy momentum but near-zero OSS tooling. GitHub stars are low because the audience (regulators, data exchanges, IP attorneys) is not the typical GitHub developer. Adoption is better measured by institutional use than by stars. The AI-assisted coefficient evaluation (especially market-value c) is the core reason I'm requesting API credits — it's the engine's main innovation and runs inference per valuation. I'm committed to long-term maintenance as this framework expands nationwide.
+This project serves China's emerging data-IP ecosystem — a niche with strong policy momentum but near-zero OSS tooling. Stars are low because the audience (regulators, data exchanges, IP attorneys) isn't typical GitHub developers; adoption is better measured by institutional use. AI-assisted coefficient evaluation (esp. market-value c) is the core reason I request API credits — it's the engine's main innovation, running inference per valuation. I'm committed to long-term maintenance.
 
 ---
 
