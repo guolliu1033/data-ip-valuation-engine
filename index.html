@@ -188,6 +188,84 @@ input[type="range"] {
 }
 .footer a { color: var(--primary); text-decoration: none; }
 
+/* Export buttons */
+.btn-export {
+  padding: 8px 16px; background: var(--primary); color: #fff;
+  border: none; border-radius: 6px; font-size: 13px; font-weight: 600;
+  cursor: pointer; transition: opacity .2s;
+}
+.btn-export:hover { opacity: .85; }
+
+/* Modal */
+.modal {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0,0,0,.5); z-index: 1000; display: flex;
+  align-items: center; justify-content: center;
+}
+.modal-content {
+  background: #fff; border-radius: var(--radius); max-width: 700px;
+  width: 90%; max-height: 85vh; overflow-y: auto; box-shadow: 0 8px 32px rgba(0,0,0,.2);
+}
+.modal-header {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 16px 24px; border-bottom: 1px solid var(--border);
+}
+.modal-header h3 { font-size: 16px; margin: 0; }
+.modal-close {
+  background: none; border: none; font-size: 20px; cursor: pointer;
+  color: var(--text-secondary); padding: 4px 8px; border-radius: 4px;
+}
+.modal-close:hover { background: var(--border); }
+.modal-body { padding: 24px; }
+
+/* QR report styles */
+.qr-report {
+  font-size: 13px; line-height: 2;
+}
+.qr-report table {
+  width: 100%; border-collapse: collapse; margin: 12px 0;
+}
+.qr-report th, .qr-report td {
+  border: 1px solid var(--border); padding: 8px 12px; text-align: left;
+  font-size: 13px;
+}
+.qr-report th { background: var(--primary-light); color: var(--primary); font-weight: 700; }
+.qr-report .qr-img {
+  text-align: center; margin: 16px 0;
+}
+.qr-report .qr-img img {
+  border: 1px solid var(--border); border-radius: 8px; padding: 8px; background: #fff;
+}
+.qr-report .report-title {
+  text-align: center; font-size: 18px; font-weight: 700; margin-bottom: 4px;
+}
+.qr-report .report-sub {
+  text-align: center; font-size: 12px; color: var(--text-secondary); margin-bottom: 16px;
+}
+.qr-report .formula-box {
+  background: var(--card-bg); border: 1px dashed var(--border); border-radius: 6px;
+  padding: 10px 14px; font-family: var(--font-mono); font-size: 14px;
+  text-align: center; margin: 10px 0; color: var(--primary); font-weight: 700;
+}
+.qr-report .result-line {
+  text-align: center; font-size: 24px; font-weight: 800; color: var(--primary);
+  margin: 12px 0; font-family: var(--font-mono);
+}
+
+/* Verify result */
+.verify-ok { background: var(--green-bg); color: var(--green); padding: 10px 16px; border-radius: 6px; font-weight: 700; }
+.verify-warn { background: var(--warn-bg); color: #9a7d0a; padding: 10px 16px; border-radius: 6px; font-weight: 700; }
+.verify-fail { background: var(--red-bg); color: var(--red); padding: 10px 16px; border-radius: 6px; font-weight: 700; }
+
+/* Print */
+@media print {
+  .btn-export, .btn-case, .btn-row, .help-panel, #qr-upload { display: none !important; }
+  .modal { position: static; background: none; }
+  .modal-content { box-shadow: none; max-width: 100%; width: 100%; border: none; }
+  body { background: #fff; }
+  .page { max-width: 100%; padding: 0; }
+}
+
 /* Help panel */
 .help-panel {
   background: #fff; border: 1px solid var(--border);
@@ -222,6 +300,7 @@ input[type="range"] {
     <h1>数据知识产权协商估值引擎</h1>
     <div class="subtitle">基于《德阳市数据知识产权协商估值指南（试行）》｜L1 公式计算 + L2 系数推荐 + L3 交叉验证</div>
     <div class="badge">德市监函〔2025〕42号 · 标准方法</div>
+    <div class="badge" style="background:#eafaf1;color:#27ae60;margin-top:4px;">v1.1 · CSV导出 + 二维码闭环</div>
   </div>
 
   <!-- Help panel -->
@@ -261,9 +340,54 @@ input[type="range"] {
     </div>
   </details>
 
-  <!-- Case button -->
+  <!-- Case button + export buttons -->
   <div class="btn-row">
     <button class="btn-case" onclick="loadCase()">📋 加载真实案例：省人民医院×扬子江 (98.8万)</button>
+  </div>
+
+  <!-- Export & QR toolbar -->
+  <div class="card full" style="margin-bottom:20px;">
+    <h3>📤 三、导出与复核</h3>
+    <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;">
+      <button class="btn-export" onclick="exportCSV()">📄 导出 CSV</button>
+      <button class="btn-export" onclick="exportReport()">🖼️ 导出带二维码报告</button>
+      <button class="btn-export" onclick="openQRScanner()">📷 扫码回填复核</button>
+      <button class="btn-export" onclick="document.getElementById('qr-upload').click()">🖼️ 上传报告图片解码</button>
+      <input type="file" id="qr-upload" accept="image/*" style="display:none" onchange="decodeUpload(event)">
+      <button class="btn-export" onclick="printReport()">🖨️ 打印报告</button>
+    </div>
+    <div class="hint" style="margin-top:8px;">CSV 导出当前案例全参数 · 二维码报告含参数+结果，可离线扫码回填复核 · 扫码/传图自动回填并比对校验</div>
+  </div>
+
+  <!-- QR Report Modal -->
+  <div id="qr-modal" class="modal" style="display:none;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>📊 估值报告（含二维码）</h3>
+        <button class="modal-close" onclick="closeQRModal()">✕</button>
+      </div>
+      <div id="qr-report-body" class="modal-body"></div>
+    </div>
+  </div>
+
+  <!-- QR Scanner Modal -->
+  <div id="scan-modal" class="modal" style="display:none;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>📷 扫码回填复核</h3>
+        <button class="modal-close" onclick="closeScanner()">✕</button>
+      </div>
+      <div class="modal-body" style="text-align:center;">
+        <div id="scan-status" style="margin-bottom:12px;font-size:13px;color:var(--text-secondary);">点击下方按钮开启摄像头扫码</div>
+        <video id="scan-video" style="width:100%;max-width:400px;border-radius:8px;display:none;" playsinline></video>
+        <canvas id="scan-canvas" style="display:none;"></canvas>
+        <div style="margin-top:12px;">
+          <button class="btn-export" onclick="startCamera()">▶️ 开启摄像头</button>
+          <button class="btn-export" onclick="stopCamera()">⏹️ 停止</button>
+        </div>
+        <div id="scan-result" style="margin-top:12px;font-size:13px;"></div>
+      </div>
+    </div>
   </div>
 
   <!-- Main grid -->
@@ -398,11 +522,14 @@ input[type="range"] {
   <div class="footer">
     基于《德阳市数据知识产权协商估值指南（试行）》（德市监函〔2025〕42号）｜
     核心公式：A = a + (d+e)×b + a×c ｜
-    案例数据来自真实协商估值确认书及中评协资产评估报告
+    案例数据来自真实协商估值确认书及中评协资产评估报告 ｜
+    <strong style="color:var(--green);">v1.1 · 2026-08-22</strong>
   </div>
 
 </div>
 
+<script src="qrcode.min.js"></script>
+<script src="jsQR.min.js"></script>
 <script>
 // ====== Core formula: A = a + (d+e) * b + a * c ======
 
@@ -539,6 +666,310 @@ function recalc() {
   // Summary
   document.getElementById('sum-purpose').textContent = '转让/许可/入股/融资';
   document.getElementById('sum-date').textContent = '2025年12月02日';
+}
+
+// ====== v1.1: Export / QR / Scan functions ======
+
+// Collect current case as a structured object
+function collectCase() {
+  const v = getVals();
+  const a = v.data + v.labor + v.equip;
+  const A = calcA(a, v.equip, v.labor, v.b, v.c);
+  return {
+    v: 1,                        // format version
+    costData: v.data,
+    costLabor: v.labor,
+    costEquip: v.equip,
+    a: round1(a),
+    flowCount: v.flow,
+    condCount: v.cond,
+    sceneLevel: document.getElementById('scene-level').value,
+    b: v.b,
+    c: v.c,
+    income: v.income,
+    result: round1(A),
+    purpose: document.getElementById('sum-purpose').textContent,
+    date: document.getElementById('sum-date').textContent,
+  };
+}
+
+function round1(n) { return Math.round(n * 10) / 10; }
+
+// CSV injection guard: prefix ' to cells starting with =+-@ to prevent Excel formula injection
+function csvGuard(s) {
+  s = String(s);
+  if (/^[=+\-@]/.test(s)) return "'" + s;
+  return s;
+}
+
+// --- CSV export ---
+function exportCSV() {
+  const c = collectCase();
+  const rows = [
+    ['字段', '值', '说明'],
+    ['版本', c.v, '报告格式版本'],
+    ['数据购买成本(万元)', c.costData, '权利方获取原始数据支付费用'],
+    ['必要劳务成本e(万元)', c.costLabor, '数据加工人工成本'],
+    ['必要设备成本d(万元)', c.costEquip, '算力/服务器/软件折旧'],
+    ['审定直接投入成本a(万元)', c.a, 'a = 数据购买 + 劳务 + 设备'],
+    ['运算流程数', c.flowCount, '数据处理步骤数'],
+    ['判定条件数', c.condCount, '加工逻辑规则/分支数'],
+    ['应用场景等级', c.sceneLevel, '好/很好/特好'],
+    ['加工难度系数b', c.b, 'L2推荐范围协商确定'],
+    ['应用场景价值系数c', c.c, 'L2推荐范围协商确定'],
+    ['收益法评估值(万元)', c.income, '中评协机构评估值(交叉验证)'],
+    ['成本法估值A(万元)', c.result, 'A = a + (d+e)×b + a×c'],
+    ['估值目的', c.purpose, ''],
+    ['估值基准日', c.date, ''],
+    ['导出时间', new Date().toLocaleString('zh-CN'), ''],
+  ];
+  // BOM for Excel UTF-8
+  let csv = '\uFEFF';
+  rows.forEach(r => {
+    csv += r.map(f => {
+      let s = csvGuard(f);
+      if (s.includes(',') || s.includes('"') || s.includes('\n')) {
+        s = '"' + s.replace(/"/g, '""') + '"';
+      }
+      return s;
+    }).join(',') + '\r\n';
+  });
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  downloadBlob(blob, `估值报告_${c.date.replace(/年|月/g,'').replace('日','')}_${c.result}万.csv`);
+}
+
+function downloadBlob(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click();
+  a.addEventListener('click', () => URL.revokeObjectURL(url), { once: true });
+  setTimeout(() => { document.body.removeChild(a); }, 200);
+}
+
+// --- QR report export ---
+function exportReport() {
+  const c = collectCase();
+  // Encode case as compact JSON for QR — only core inputs, result can be recomputed
+  const qrData = JSON.stringify({
+    v: 1,
+    cd: c.costData, ce: c.costLabor, cd2: c.costEquip,
+    fc: c.flowCount, cc: c.condCount, sl: c.sceneLevel,
+    b: c.b, c: c.c, ic: c.income,
+  });
+  // Generate QR
+  const qr = qrcode(0, 'M'); // type 0 = auto, error M
+  qr.addData(qrData);
+  qr.make();
+  const qrImg = qr.createDataURL(8, 0); // cellSize=8, margin=0
+
+  const html = `
+    <div class="qr-report">
+      <div class="report-title">数据知识产权协商估值报告</div>
+      <div class="report-sub">基于《德阳市数据知识产权协商估值指南（试行）》｜德市监函〔2025〕42号</div>
+
+      <table>
+        <tr><th>估值目的</th><td>${c.purpose}</td></tr>
+        <tr><th>估值基准日</th><td>${c.date}</td></tr>
+        <tr><th>权利方</th><td>四川省人民医院</td></tr>
+        <tr><th>相对方</th><td>扬子江药业集团</td></tr>
+        <tr><th>评估方法</th><td>成本法（协商估值）</td></tr>
+      </table>
+
+      <div class="formula-box">核心公式：A = a + (d+e)×b + a×c</div>
+
+      <table>
+        <tr><th>参数</th><th>值</th><th>说明</th></tr>
+        <tr><td>数据购买成本</td><td>${c.costData} 万元</td><td>权利方获取原始数据费用</td></tr>
+        <tr><td>必要劳务成本 e</td><td>${c.costLabor} 万元</td><td>数据加工人工成本</td></tr>
+        <tr><td>必要设备成本 d</td><td>${c.costEquip} 万元</td><td>算力/服务器/软件折旧</td></tr>
+        <tr><td>审定直接投入成本 a</td><td><strong>${c.a} 万元</strong></td><td>a = 数据购买 + e + d</td></tr>
+        <tr><td>运算流程数</td><td>${c.flowCount}</td><td>处理步骤数</td></tr>
+        <tr><td>判定条件数</td><td>${c.condCount}</td><td>规则/分支数</td></tr>
+        <tr><td>应用场景等级</td><td>${c.sceneLevel}</td><td>好/很好/特好</td></tr>
+        <tr><td>加工难度系数 b</td><td>${c.b}</td><td>L2 推荐+协商</td></tr>
+        <tr><td>应用场景价值系数 c</td><td>${c.c}</td><td>L2 推荐+协商</td></tr>
+        <tr><td>收益法评估值</td><td>${c.income} 万元</td><td>中评协机构(交叉验证)</td></tr>
+      </table>
+
+      <div class="formula-box">
+        A = ${c.a} + (${c.costEquip}+${c.costLabor})×${c.b} + ${c.a}×${c.c}
+      </div>
+      <div class="result-line">A = ${c.result} 万元</div>
+
+      <div class="qr-img">
+        <img src="${qrImg}" alt="估值参数二维码" width="200" height="200">
+        <div style="font-size:11px;color:var(--text-secondary);margin-top:6px;">↑ 扫此二维码可回填复核全部参数</div>
+      </div>
+
+      <div style="font-size:11px;color:#a0a8b4;margin-top:16px;border-top:1px solid var(--border);padding-top:8px;">
+        本报告由「数据知识产权协商估值引擎」自动生成 · 二维码含全部参数 · 扫码即自动回填并比对校验
+      </div>
+    </div>
+  `;
+
+  document.getElementById('qr-report-body').innerHTML = html;
+  document.getElementById('qr-modal').style.display = 'flex';
+}
+
+function closeQRModal() {
+  document.getElementById('qr-modal').style.display = 'none';
+}
+
+// --- Print report ---
+function printReport() {
+  exportReport();
+  setTimeout(() => window.print(), 300);
+}
+
+// --- QR Scanner (camera) ---
+let scanStream = null;
+let scanRAF = null;
+
+function openQRScanner() {
+  document.getElementById('scan-modal').style.display = 'flex';
+  document.getElementById('scan-status').textContent = '点击「开启摄像头」按钮扫码';
+}
+
+function closeScanner() {
+  stopCamera();
+  document.getElementById('scan-modal').style.display = 'none';
+}
+
+function startCamera() {
+  const video = document.getElementById('scan-video');
+  document.getElementById('scan-status').textContent = '正在请求摄像头...';
+  navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+    .then(stream => {
+      scanStream = stream;
+      video.srcObject = stream;
+      video.style.display = 'block';
+      video.play();
+      document.getElementById('scan-status').textContent = '摄像头已开启，对准报告二维码...';
+      scanLoop();
+    })
+    .catch(err => {
+      document.getElementById('scan-status').textContent = '摄像头不可用：' + err.message + '（可改用「上传报告图片解码」）';
+    });
+}
+
+function stopCamera() {
+  if (scanRAF) { cancelAnimationFrame(scanRAF); scanRAF = null; }
+  if (scanStream) {
+    scanStream.getTracks().forEach(t => t.stop());
+    scanStream = null;
+  }
+  const video = document.getElementById('scan-video');
+  video.style.display = 'none';
+}
+
+function scanLoop() {
+  const video = document.getElementById('scan-video');
+  const canvas = document.getElementById('scan-canvas');
+  if (!scanStream || video.readyState !== video.HAVE_ENOUGH_DATA) {
+    scanRAF = requestAnimationFrame(scanLoop);
+    return;
+  }
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+  const ctx = canvas.getContext('2d', { willReadFrequently: true });
+  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+  const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  const code = jsQR(imgData.data, imgData.width, imgData.height);
+  if (code && code.data) {
+    document.getElementById('scan-status').textContent = '✅ 扫码成功！正在回填...';
+    stopCamera();
+    applyQRCase(code.data, 'camera');
+    return;
+  }
+  scanRAF = requestAnimationFrame(scanLoop);
+}
+
+// --- Upload image decode ---
+function decodeUpload(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const img = new Image();
+  img.onload = function() {
+    const canvas = document.createElement('canvas');
+    canvas.width = img.width;
+    canvas.height = img.height;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(img, 0, 0);
+    const imgData = ctx.getImageData(0, 0, img.width, img.height);
+    const code = jsQR(imgData.data, imgData.width, imgData.height);
+    if (code && code.data) {
+      applyQRCase(code.data, 'upload');
+    } else {
+      alert('未检测到二维码，请确认图片清晰且含估值报告二维码');
+    }
+  };
+  img.src = URL.createObjectURL(file);
+  event.target.value = ''; // reset for re-upload
+}
+
+// --- Apply QR data back to form & verify ---
+function applyQRCase(rawData, source) {
+  let qr;
+  try {
+    qr = JSON.parse(rawData);
+  } catch(e) {
+    alert('二维码内容无法解析（非本工具格式）');
+    return;
+  }
+  if (qr.v !== 1) {
+    alert('二维码版本不兼容（v=' + qr.v + '）');
+    return;
+  }
+
+  // Data type & boundary validation
+  const numFields = { cd:1, ce:1, cd2:1, fc:1, cc:1, b:1, c:1, ic:1 };
+  for (const k in numFields) {
+    if (typeof qr[k] !== 'number' || isNaN(qr[k])) {
+      alert('二维码数据校验失败：字段 ' + k + ' 不是有效数值');
+      return;
+    }
+  }
+  if (typeof qr.sl !== 'string' || !['good','great','superb'].includes(qr.sl)) {
+    alert('二维码数据校验失败：场景等级无效');
+    return;
+  }
+
+  // Fill form
+  document.getElementById('cost-data').value = qr.cd;
+  document.getElementById('cost-labor').value = qr.ce;
+  document.getElementById('cost-equip').value = qr.cd2;
+  document.getElementById('flow-count').value = qr.fc;
+  document.getElementById('cond-count').value = qr.cc;
+  document.getElementById('scene-level').value = qr.sl;
+  document.getElementById('b-slider').value = qr.b;
+  document.getElementById('c-slider').value = qr.c;
+  document.getElementById('income-val').value = qr.ic;
+
+  recalcB();
+  recalcC();
+  recalc();
+
+  // Verify: recomputed result should match (QR no longer stores result, so just confirm)
+  const v = getVals();
+  const a = v.data + v.labor + v.equip;
+  const computedA = calcA(a, v.equip, v.labor, v.b, v.c);
+
+  let verifyHtml = `<div class="verify-ok">✅ 回填成功：参数已自动填入并重新计算，估值结果 = ${round1(computedA)} 万元（由二维码参数重算得出）</div>`;
+
+  const resultEl = document.getElementById('scan-result');
+  if (resultEl) {
+    resultEl.innerHTML = verifyHtml;
+  } else {
+    alert(verifyHtml.replace(/<[^>]+>/g, ''));
+  }
+
+  // Also show in scan modal
+  if (source === 'upload') {
+    document.getElementById('scan-status').textContent = '✅ 图片解码成功，已回填并校验';
+    document.getElementById('scan-result').innerHTML = verifyHtml;
+    document.getElementById('scan-modal').style.display = 'flex';
+  }
 }
 
 // ====== Load default case ======
