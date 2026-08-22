@@ -266,6 +266,25 @@ input[type="range"] {
   .page { max-width: 100%; padding: 0; }
 }
 
+/* Fine mode (v1.3) */
+.fine-mode {
+  margin-top: 10px;
+  border: 1px dashed var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+}
+.fine-mode summary {
+  cursor: pointer; padding: 10px 14px; font-size: 13px; font-weight: 700;
+  color: var(--accent); background: #fef9e7; user-select: none; list-style: none;
+}
+.fine-mode summary::-webkit-details-marker { display: none; }
+.fine-body { padding: 14px 16px; background: #fff; }
+.fine-result-table { width: 100%; font-size: 12px; border-collapse: collapse; }
+.fine-result-table th { padding: 5px 8px; text-align: left; background: var(--primary-light); color: var(--primary); font-weight: 700; }
+.fine-result-table td { padding: 5px 8px; border-bottom: 1px solid var(--border); }
+.fine-result-table td.c { text-align: center; }
+.fine-result-table tr.total td { font-weight: 700; border-top: 2px solid var(--border); border-bottom: none; }
+
 /* Help panel */
 .help-panel {
   background: #fff; border: 1px solid var(--border);
@@ -300,7 +319,7 @@ input[type="range"] {
     <h1>数据知识产权协商估值引擎</h1>
     <div class="subtitle">基于《德阳市数据知识产权协商估值指南（试行）》｜L1 公式计算 + L2 系数推荐 + L3 交叉验证</div>
     <div class="badge">德市监函〔2025〕42号 · 标准方法</div>
-    <div class="badge" style="background:#eafaf1;color:#27ae60;margin-top:4px;">v1.2 · CSV导出 + 二维码闭环 + 外部报告提取</div>
+    <div class="badge" style="background:#eafaf1;color:#27ae60;margin-top:4px;">v1.3 · 精细系数拆分（b 五子系数）+ 二维码闭环 + 外部报告提取</div>
   </div>
 
   <!-- Help panel -->
@@ -563,6 +582,72 @@ input[type="range"] {
         <div class="hint">在上方推荐范围内，双方根据加工复杂度协商确定；可拖动微调</div>
       </div>
 
+      <!-- v1.3 fine mode -->
+      <details class="fine-mode" id="fine-b">
+        <summary>🔬 v1.3 精细评估：五子系数拆分 b（可选，默认关闭走简易模式）</summary>
+        <div class="fine-body">
+          <div class="hint" style="margin-bottom:10px;">依据 GB/T 36344 数据质量框架与中评协第9号指引，把 b 拆为 B1~B5 五个子维度打分再加权合成。B1 取上方「运算流程数」，B2 取「判定条件数」，此处只填 B3~B5。</div>
+
+          <div class="section-title" style="margin-top:0;">B3 质量治理负荷</div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>有书面质量规则的维度数（0~6）</label>
+              <input type="number" id="b3-quality-dim" value="1" min="0" max="6" oninput="recalcB()">
+              <div class="hint">准确性/一致性/完整性/规范性/时效性/可访问性中，有阈值+检测规则+结果记录的维度数</div>
+            </div>
+            <div class="form-group">
+              <label>已执行的质量检查规则数</label>
+              <input type="number" id="b3-quality-check" value="3" min="0" max="200" oninput="recalcB()">
+              <div class="hint">非空/值域/格式/主键/跨表一致/时效等检查规则数</div>
+            </div>
+          </div>
+
+          <div class="section-title">B4 多源异构整合复杂度</div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>源系统数</label>
+              <input type="number" id="b4-source" value="1" min="0" max="20" oninput="recalcB()">
+              <div class="hint">独立系统/数据库/API/外部文件主体数，同一系统多表计 1</div>
+            </div>
+            <div class="form-group">
+              <label>数据格式类别数（0~6）</label>
+              <input type="number" id="b4-format" value="1" min="0" max="6" oninput="recalcB()">
+              <div class="hint">结构化表/JSON/XML/文本/图像/音视频/时序各计 1</div>
+            </div>
+          </div>
+
+          <div class="section-title">B5 安全合规与受控交付负荷</div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>受控交付措施数（0~6）</label>
+              <input type="number" id="b5-control" value="0" min="0" max="6" oninput="recalcB()">
+              <div class="hint">脱敏/敏感识别掩码/细粒度授权/用途期限控制/血缘审计/隐私计算</div>
+            </div>
+            <div class="form-group">
+              <label style="display:flex;align-items:center;gap:6px;margin-top:22px;">
+                <input type="checkbox" id="b5-trusted" onchange="recalcB()" style="width:auto;">
+                使用隐私计算/可信数据空间（数据不出域）
+              </label>
+            </div>
+          </div>
+
+          <div class="section-title">权重方案</div>
+          <div class="form-group">
+            <select id="b-weight-scheme" onchange="recalcB()">
+              <option value="W1" selected>W1 成本敏感专家权重（推荐）— B1:0.30 B2:0.25 B3:0.20 B4:0.15 B5:0.10</option>
+              <option value="W0">W0 等权基准 — 各 0.20（冷启动/降低专家先验）</option>
+            </select>
+          </div>
+
+          <div style="margin-top:10px;">
+            <button class="btn-export" onclick="applyFineB()">📐 按五子系数合成推荐 b</button>
+            <button class="btn-export" onclick="loadCalibration()" style="background:var(--green);">🧪 校准演示：复现省医院案例 b=1.4</button>
+            <span style="font-size:12px;color:var(--text-secondary);margin-left:8px;">合成后自动填入上方 b 滑块</span>
+          </div>
+          <div id="fine-b-result" style="margin-top:12px;"></div>
+        </div>
+      </details>
+
       <div class="section-title">L2 系数推荐 — 应用场景价值系数 c</div>
       <div class="form-group">
         <label>应用场景等级</label>
@@ -639,7 +724,7 @@ input[type="range"] {
     基于《德阳市数据知识产权协商估值指南（试行）》（德市监函〔2025〕42号）｜
     核心公式：A = a + (d+e)×b + a×c ｜
     案例数据来自真实协商估值确认书及中评协资产评估报告 ｜
-    <strong style="color:var(--green);">v1.2 · 2026-08-22</strong>
+    <strong style="color:var(--green);">v1.3 · 2026-08-22</strong>
   </div>
 
 </div>
@@ -707,6 +792,154 @@ function recalcB() {
   document.getElementById('b-val').textContent = slider.value;
 }
 
+// ====== v1.3: Fine-grained b scoring (five sub-coefficients) ======
+// Bases: GB/T 36344 quality dimensions + 中评协 Expert Guideline No.9
+// Each sub-coefficient buckets into {1.0, 1.7, 2.7, 4.0}
+
+const FINE_LEVELS = { base: 1.0, mid: 1.7, high: 2.7, max: 4.0 };
+
+// B1: Process topology — bucket by atomic processing step count
+function bucketB1(steps) {
+  if (steps <= 2) return FINE_LEVELS.base;
+  if (steps <= 4) return FINE_LEVELS.mid;
+  if (steps <= 6) return FINE_LEVELS.high;
+  return FINE_LEVELS.max;
+}
+
+// B2: Business rules — bucket by atomic judgment rule count
+function bucketB2(rules) {
+  if (rules <= 3) return FINE_LEVELS.base;
+  if (rules <= 6) return FINE_LEVELS.mid;
+  if (rules <= 12) return FINE_LEVELS.high;
+  return FINE_LEVELS.max;
+}
+
+// B3: Quality governance — max of dimension bucket and check-count bucket
+function bucketB3(dimCount, checkCount) {
+  function dimBucket(d) {
+    if (d <= 1) return FINE_LEVELS.base;
+    if (d <= 3) return FINE_LEVELS.mid;
+    if (d <= 5) return FINE_LEVELS.high;
+    return FINE_LEVELS.max;
+  }
+  function checkBucket(c) {
+    if (c <= 5) return FINE_LEVELS.base;
+    if (c <= 20) return FINE_LEVELS.mid;
+    if (c <= 50) return FINE_LEVELS.high;
+    return FINE_LEVELS.max;
+  }
+  return Math.max(dimBucket(dimCount), checkBucket(checkCount));
+}
+
+// B4: Multi-source integration — max of source bucket and format bucket
+function bucketB4(sourceCount, formatCount) {
+  function srcBucket(s) {
+    if (s <= 1) return FINE_LEVELS.base;
+    if (s === 2) return FINE_LEVELS.mid;
+    if (s <= 4) return FINE_LEVELS.high;
+    return FINE_LEVELS.max;
+  }
+  function fmtBucket(f) {
+    if (f <= 1) return FINE_LEVELS.base;
+    if (f === 2) return FINE_LEVELS.mid;
+    if (f === 3) return FINE_LEVELS.high;
+    return FINE_LEVELS.max;
+  }
+  return Math.max(srcBucket(sourceCount), fmtBucket(formatCount));
+}
+
+// B5: Security compliance & controlled delivery
+function bucketB5(controlCount, trustedSpace) {
+  if (trustedSpace) return FINE_LEVELS.max;
+  if (controlCount === 0) return FINE_LEVELS.base;
+  if (controlCount === 1) return FINE_LEVELS.mid;
+  if (controlCount <= 3) return FINE_LEVELS.high;
+  return FINE_LEVELS.max;
+}
+
+const WEIGHTS = {
+  W0: { B1: 0.20, B2: 0.20, B3: 0.20, B4: 0.20, B5: 0.20 },
+  W1: { B1: 0.30, B2: 0.25, B3: 0.20, B4: 0.15, B5: 0.10 },
+};
+
+// roundHalfUp to 1 decimal, then clamp
+function roundHalfUp(x, dp) {
+  const f = Math.pow(10, dp);
+  return Math.floor(x * f + 0.5) / f;
+}
+function clamp(x, lo, hi) { return Math.max(lo, Math.min(x, hi)); }
+
+// Score b from five sub-coefficients. Returns breakdown object.
+function scoreB() {
+  const flow = parseInt(document.getElementById('flow-count').value) || 1;
+  const cond = parseInt(document.getElementById('cond-count').value) || 1;
+  const qDim = parseInt(document.getElementById('b3-quality-dim').value) || 0;
+  const qChk = parseInt(document.getElementById('b3-quality-check').value) || 0;
+  const src = parseInt(document.getElementById('b4-source').value) || 0;
+  const fmt = parseInt(document.getElementById('b4-format').value) || 0;
+  const ctrl = parseInt(document.getElementById('b5-control').value) || 0;
+  const trusted = document.getElementById('b5-trusted').checked;
+  const scheme = document.getElementById('b-weight-scheme').value || 'W1';
+  const w = WEIGHTS[scheme];
+
+  const B1 = bucketB1(flow);
+  const B2 = bucketB2(cond);
+  const B3 = bucketB3(qDim, qChk);
+  const B4 = bucketB4(src, fmt);
+  const B5 = bucketB5(ctrl, trusted);
+
+  const raw = w.B1 * B1 + w.B2 * B2 + w.B3 * B3 + w.B4 * B4 + w.B5 * B5;
+  const recommended = clamp(roundHalfUp(raw, 1), 0.1, 10.0);
+  return { scheme, subs: { B1, B2, B3, B4, B5 }, weights: w, raw, recommended };
+}
+
+// Render the fine-mode breakdown table and recommended b
+function applyFineB() {
+  const r = scoreB();
+  const rows = [
+    ['B1 流程拓扑', '运算流程数', r.subs.B1, r.weights.B1],
+    ['B2 业务规则', '判定条件数', r.subs.B2, r.weights.B2],
+    ['B3 质量治理', '维度/检查规则数', r.subs.B3, r.weights.B3],
+    ['B4 多源整合', '源系统/格式数', r.subs.B4, r.weights.B4],
+    ['B5 安全合规', '受控措施/可信空间', r.subs.B5, r.weights.B5],
+  ];
+  let html = '<table class="fine-result-table"><tr><th>子系数</th><th>输入</th><th class="c">得分</th><th class="c">权重</th><th class="c">贡献</th></tr>';
+  for (const [name, input, score, weight] of rows) {
+    html += `<tr><td>${name}</td><td>${input}</td><td class="c">${score.toFixed(1)}</td><td class="c">${weight.toFixed(2)}</td><td class="c">${(score * weight).toFixed(3)}</td></tr>`;
+  }
+  html += `<tr class="total"><td>加权合成 b_raw</td><td>${r.scheme === 'W1' ? '成本敏感专家权重' : '等权基准'}</td><td class="c">${r.raw.toFixed(3)}</td><td class="c">1.00</td><td class="c">→ ${r.recommended.toFixed(1)}</td></tr>`;
+  html += '</table>';
+  document.getElementById('fine-b-result').innerHTML = html;
+
+  // Auto-fill the b slider with the recommended value.
+  // The fine score may fall outside the coarse band (e.g. calibration rec=1.4 but mid band min=1.5),
+  // so widen the slider range to accept it rather than letting the browser clamp.
+  const slider = document.getElementById('b-slider');
+  recalcB(); // sets slider.min/max to the coarse band
+  const curMin = parseFloat(slider.min), curMax = parseFloat(slider.max);
+  if (r.recommended < curMin) slider.min = r.recommended;
+  if (r.recommended > curMax) slider.max = r.recommended;
+  slider.value = r.recommended;
+  document.getElementById('b-val').textContent = r.recommended.toFixed(1);
+  recalc();
+}
+
+// v1.3 calibration demo: reproduce 省人民医院×扬子江 case b=1.4
+// B1/B2 at 1.7 (flow 3-4, cond 4-6), B3-B5 at base 1.0 → b_raw=1.385 → roundHalfUp → 1.4
+function loadCalibration() {
+  document.getElementById('flow-count').value = 4;
+  document.getElementById('cond-count').value = 5;
+  document.getElementById('b3-quality-dim').value = 1;
+  document.getElementById('b3-quality-check').value = 3;
+  document.getElementById('b4-source').value = 1;
+  document.getElementById('b4-format').value = 1;
+  document.getElementById('b5-control').value = 0;
+  document.getElementById('b5-trusted').checked = false;
+  document.getElementById('b-weight-scheme').value = 'W1';
+  recalcB();
+  applyFineB();
+}
+
 function recalcC() {
   const level = document.getElementById('scene-level').value;
   const cfg = SCENE_TABLE[level];
@@ -728,7 +961,9 @@ function syncSlider() {
 }
 
 function recalc() {
-  syncSlider(); // sync display first
+  // 同步显示（注意：syncSlider 会调用 recalc，此处不能再调 syncSlider，否则无限递归）
+  document.getElementById('b-val').textContent = document.getElementById('b-slider').value;
+  document.getElementById('c-val').textContent = document.getElementById('c-slider').value;
   const {data, labor, equip, b, c, income} = getVals();
   const a = data + labor + equip;
   const dpe = labor + equip;
