@@ -300,7 +300,7 @@ input[type="range"] {
     <h1>数据知识产权协商估值引擎</h1>
     <div class="subtitle">基于《德阳市数据知识产权协商估值指南（试行）》｜L1 公式计算 + L2 系数推荐 + L3 交叉验证</div>
     <div class="badge">德市监函〔2025〕42号 · 标准方法</div>
-    <div class="badge" style="background:#eafaf1;color:#27ae60;margin-top:4px;">v1.1 · CSV导出 + 二维码闭环</div>
+    <div class="badge" style="background:#eafaf1;color:#27ae60;margin-top:4px;">v1.2 · CSV导出 + 二维码闭环 + 外部报告提取</div>
   </div>
 
   <!-- Help panel -->
@@ -357,6 +357,122 @@ input[type="range"] {
       <button class="btn-export" onclick="printReport()">🖨️ 打印报告</button>
     </div>
     <div class="hint" style="margin-top:8px;">CSV 导出当前案例全参数 · 二维码报告含参数+结果，可离线扫码回填复核 · 扫码/传图自动回填并比对校验</div>
+  </div>
+
+  <!-- v1.2: External Report Extraction -->
+  <div class="card full" style="margin-bottom:20px;" id="extract-card">
+    <h3>📥 四、外部报告提取（v1.2）</h3>
+    <div class="hint" style="margin-bottom:12px;">扫描/上传第三方《数据资产评估报告》二维码，或粘贴报告正文，自动提取成本构成与加工方法，映射填入估值模型。支持双路径：规则解析（离线）+ AI 语义提取（需 API 额度）。</div>
+
+    <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:14px;">
+      <button class="btn-export" onclick="document.getElementById('ext-qr-upload').click()">📷 上传报告二维码图片</button>
+      <input type="file" id="ext-qr-upload" accept="image/*" style="display:none" onchange="decodeExtQR(event)">
+      <button class="btn-export" onclick="openExtScanner()">📷 摄像头扫外部报告</button>
+      <button class="btn-export" onclick="togglePasteArea()">📝 粘贴报告文本提取</button>
+    </div>
+
+    <!-- Paste area (hidden by default) -->
+    <div id="paste-area" style="display:none;margin-bottom:14px;">
+      <div class="form-group">
+        <label>粘贴报告正文（或关键段落）</label>
+        <textarea id="report-text" rows="6" style="width:100%;border:1px solid var(--border);border-radius:6px;padding:10px;font-size:13px;font-family:inherit;line-height:1.6;" placeholder="将评估报告中的成本构成、加工流程描述、场景说明等段落粘贴到此处..."></textarea>
+      </div>
+      <div style="display:flex;gap:10px;">
+        <button class="btn-export" onclick="extractByRules()">🔍 规则解析（离线）</button>
+        <button class="btn-export" onclick="extractByAI()" id="ai-extract-btn">🤖 AI 语义提取（需 API）</button>
+      </div>
+    </div>
+
+    <!-- AI config (collapsible) -->
+    <details style="margin-bottom:10px;">
+      <summary style="cursor:pointer;font-size:12px;color:var(--text-secondary);user-select:none;">⚙️ AI 提取配置（点击展开填写 API 信息）</summary>
+      <div style="margin-top:8px;padding:10px;background:var(--card-bg);border:1px solid var(--border);border-radius:6px;">
+        <div class="form-row">
+          <div class="form-group">
+            <label>API Endpoint</label>
+            <input type="text" id="ai-endpoint" value="https://codingplan-staging.alayanew.com:26443/v1" style="font-size:12px;">
+          </div>
+          <div class="form-group">
+            <label>API Key</label>
+            <input type="password" id="ai-key" placeholder="sk-..." style="font-size:12px;">
+          </div>
+          <div class="form-group">
+            <label>模型</label>
+            <input type="text" id="ai-model" value="glm-5.2" style="font-size:12px;">
+          </div>
+        </div>
+        <div class="hint">AI 提取调用外部 API，prompt 不经过本地。⚠️ 仅用于非敏感数据，医疗/患者信息勿走 AI 路径。</div>
+      </div>
+    </details>
+
+    <!-- Extraction result -->
+    <div id="extract-result" style="display:none;margin-top:12px;">
+      <div class="section-title">提取结果（可编辑后回填）</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>数据购买成本（万元）</label>
+          <input type="number" id="ext-cost-data" value="" step="0.1">
+        </div>
+        <div class="form-group">
+          <label>必要劳务成本 e（万元）</label>
+          <input type="number" id="ext-cost-labor" value="" step="0.1">
+        </div>
+        <div class="form-group">
+          <label>必要设备成本 d（万元）</label>
+          <input type="number" id="ext-cost-equip" value="" step="0.1">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>运算流程数</label>
+          <input type="number" id="ext-flow" value="" min="1" max="20">
+        </div>
+        <div class="form-group">
+          <label>判定条件数</label>
+          <input type="number" id="ext-cond" value="" min="1" max="30">
+        </div>
+        <div class="form-group">
+          <label>场景等级</label>
+          <select id="ext-scene">
+            <option value="">—请选择—</option>
+            <option value="good">好</option>
+            <option value="great">很好</option>
+            <option value="superb">特好</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>报告原估值（万元）</label>
+          <input type="number" id="ext-report-val" value="" step="0.1">
+          <div class="hint">用于回填后比对校验</div>
+        </div>
+      </div>
+      <div style="margin-top:10px;">
+        <button class="btn-export" onclick="applyExtractToForm()">✅ 回填到估值模型并校验</button>
+      </div>
+      <div id="extract-verify" style="margin-top:10px;"></div>
+    </div>
+  </div>
+
+  <!-- External QR Scanner Modal -->
+  <div id="ext-scan-modal" class="modal" style="display:none;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>📷 扫描外部报告二维码</h3>
+        <button class="modal-close" onclick="closeExtScanner()">✕</button>
+      </div>
+      <div class="modal-body" style="text-align:center;">
+        <div id="ext-scan-status" style="margin-bottom:12px;font-size:13px;color:var(--text-secondary);">点击下方按钮开启摄像头扫码</div>
+        <video id="ext-scan-video" style="width:100%;max-width:400px;border-radius:8px;display:none;" playsinline></video>
+        <canvas id="ext-scan-canvas" style="display:none;"></canvas>
+        <div style="margin-top:12px;">
+          <button class="btn-export" onclick="startExtCamera()">▶️ 开启摄像头</button>
+          <button class="btn-export" onclick="stopExtCamera()">⏹️ 停止</button>
+        </div>
+        <div id="ext-scan-result" style="margin-top:12px;font-size:13px;"></div>
+      </div>
+    </div>
   </div>
 
   <!-- QR Report Modal -->
@@ -523,7 +639,7 @@ input[type="range"] {
     基于《德阳市数据知识产权协商估值指南（试行）》（德市监函〔2025〕42号）｜
     核心公式：A = a + (d+e)×b + a×c ｜
     案例数据来自真实协商估值确认书及中评协资产评估报告 ｜
-    <strong style="color:var(--green);">v1.1 · 2026-08-22</strong>
+    <strong style="color:var(--green);">v1.2 · 2026-08-22</strong>
   </div>
 
 </div>
@@ -970,6 +1086,328 @@ function applyQRCase(rawData, source) {
     document.getElementById('scan-result').innerHTML = verifyHtml;
     document.getElementById('scan-modal').style.display = 'flex';
   }
+}
+
+// ====== v1.2: External Report Extraction ======
+
+// --- Toggle paste area ---
+function togglePasteArea() {
+  const area = document.getElementById('paste-area');
+  area.style.display = area.style.display === 'none' ? 'block' : 'none';
+}
+
+// --- Upload external report QR image ---
+function decodeExtQR(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const img = new Image();
+  img.onload = function() {
+    const canvas = document.createElement('canvas');
+    canvas.width = img.width;
+    canvas.height = img.height;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(img, 0, 0);
+    const imgData = ctx.getImageData(0, 0, img.width, img.height);
+    const code = jsQR(imgData.data, imgData.width, img.height);
+    if (code && code.data) {
+      handleExtQRData(code.data);
+    } else {
+      alert('未检测到二维码。外部报告二维码可能是非标准格式，请尝试「粘贴报告文本提取」路径。');
+    }
+  };
+  img.src = URL.createObjectURL(file);
+  event.target.value = '';
+}
+
+// --- External scanner (camera) ---
+let extStream = null;
+let extRAF = null;
+
+function openExtScanner() {
+  document.getElementById('ext-scan-modal').style.display = 'flex';
+  document.getElementById('ext-scan-status').textContent = '点击「开启摄像头」按钮扫码';
+}
+
+function closeExtScanner() {
+  stopExtCamera();
+  document.getElementById('ext-scan-modal').style.display = 'none';
+}
+
+function startExtCamera() {
+  const video = document.getElementById('ext-scan-video');
+  document.getElementById('ext-scan-status').textContent = '正在请求摄像头...';
+  navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+    .then(stream => {
+      extStream = stream;
+      video.srcObject = stream;
+      video.style.display = 'block';
+      video.play();
+      document.getElementById('ext-scan-status').textContent = '摄像头已开启，对准报告二维码...';
+      extScanLoop();
+    })
+    .catch(err => {
+      document.getElementById('ext-scan-status').textContent = '摄像头不可用：' + err.message + '（可改用「上传报告二维码图片」或「粘贴文本」）';
+    });
+}
+
+function stopExtCamera() {
+  if (extRAF) { cancelAnimationFrame(extRAF); extRAF = null; }
+  if (extStream) { extStream.getTracks().forEach(t => t.stop()); extStream = null; }
+  document.getElementById('ext-scan-video').style.display = 'none';
+}
+
+function extScanLoop() {
+  const video = document.getElementById('ext-scan-video');
+  const canvas = document.getElementById('ext-scan-canvas');
+  if (!extStream || video.readyState !== video.HAVE_ENOUGH_DATA) {
+    extRAF = requestAnimationFrame(extScanLoop);
+    return;
+  }
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+  const ctx = canvas.getContext('2d', { willReadFrequently: true });
+  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+  const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  const code = jsQR(imgData.data, imgData.width, imgData.height);
+  if (code && code.data) {
+    document.getElementById('ext-scan-status').textContent = '✅ 扫码成功！正在提取...';
+    stopExtCamera();
+    handleExtQRData(code.data);
+    return;
+  }
+  extRAF = requestAnimationFrame(extScanLoop);
+}
+
+// --- Handle external QR data: could be JSON, URL, or text ---
+function handleExtQRData(rawData) {
+  // Try JSON first (some platforms emit structured QR)
+  try {
+    const obj = JSON.parse(rawData);
+    if (obj && typeof obj === 'object') {
+      // Looks like structured data — map fields
+      mapExtractToForm({
+        costData: obj.costData ?? obj.dataCost ?? obj['数据购买'] ?? obj.cd,
+        costLabor: obj.costLabor ?? obj.laborCost ?? obj['劳务成本'] ?? obj.ce ?? obj.cl,
+        costEquip: obj.costEquip ?? obj.equipCost ?? obj['设备成本'] ?? obj.cd2 ?? obj.ce2,
+        flowCount: obj.flowCount ?? obj.flow ?? obj['运算流程数'] ?? obj.fc,
+        condCount: obj.condCount ?? obj.cond ?? obj['判定条件数'] ?? obj.cc,
+        sceneLevel: obj.sceneLevel ?? obj.scene ?? obj.sl,
+        reportVal: obj.result ?? obj.valuation ?? obj['评估值'] ?? obj.r,
+      }, '二维码JSON');
+      return;
+    }
+  } catch(e) { /* not JSON, fall through */ }
+
+  // Try URL (some reports link to a web page)
+  if (/^https?:\/\//.test(rawData)) {
+    alert('二维码内容是网址：' + rawData + '\n\n请复制该网址内容，粘贴到「粘贴报告文本提取」框中再提取。');
+    return;
+  }
+
+  // Treat as plain text report content
+  showExtractResult();
+  document.getElementById('report-text').value = rawData;
+  extractByRules();
+}
+
+// --- Rule-based extraction from pasted text ---
+function extractByRules() {
+  const text = document.getElementById('report-text').value;
+  if (!text.trim()) { alert('请先粘贴报告文本'); return; }
+
+  const result = {
+    costData: null, costLabor: null, costEquip: null,
+    flowCount: null, condCount: null, sceneLevel: null, reportVal: null,
+  };
+
+  // Cost extraction patterns (万元/元/万)
+  const patterns = {
+    costData:  [/(?:数据购买|原始数据|数据采购|数据获取)[^\d]*([\d.]+)\s*(?:万元|万|元)/i,
+                /(?:数据成本|购买成本)[^\d]*([\d.]+)\s*(?:万元|万|元)/i],
+    costLabor:  [/(?:劳务成本|人工成本|人力成本|人员费用|清洗|标注|脱敏)[^\d]*([\d.]+)\s*(?:万元|万|元)/i,
+                /(?:必要劳务|加工人工)[^\d]*([\d.]+)\s*(?:万元|万|元)/i],
+    costEquip:  [/(?:设备成本|设备费用|硬件|服务器|算力|软件)[^\d]*([\d.]+)\s*(?:万元|万|元)/i,
+                /(?:必要设备|设备折旧)[^\d]*([\d.]+)\s*(?:万元|万|元)/i],
+    flowCount:  [/(?:运算流程|处理流程|加工步骤|处理步骤|流程数)[^\d]*(\d+)/i,
+                 /(\d+)\s*(?:个流程|个步骤|步)/i],
+    condCount:  [/(?:判定条件|条件数|规则数|分支)[^\d]*(\d+)/i,
+                /(\d+)\s*(?:个条件|个规则|个分支)/i],
+    reportVal:  [/(?:评估值|估值|评估结果|评估结论|价值)[^\d]*([\d.]+)\s*(?:万元|万|元)/i,
+                /(?:评估值[:：])[^\d]*([\d.]+)/i],
+  };
+
+  for (const [field, pats] of Object.entries(patterns)) {
+    for (const p of pats) {
+      const m = text.match(p);
+      if (m) { result[field] = parseFloat(m[1]); break; }
+    }
+  }
+
+  // Scene level extraction
+  if (/特好|显著促进/.test(text)) result.sceneLevel = 'superb';
+  else if (/很好|明显促进/.test(text)) result.sceneLevel = 'great';
+  else if (/好[，。]|促进/.test(text)) result.sceneLevel = 'good';
+
+  // Normalize: 元→万元
+  for (const k of ['costData','costLabor','costEquip','reportVal']) {
+    if (result[k] !== null && result[k] > 10000) result[k] = result[k] / 10000;
+  }
+
+  mapExtractToForm(result, '规则解析');
+}
+
+// --- AI-based extraction ---
+async function extractByAI() {
+  const text = document.getElementById('report-text').value;
+  if (!text.trim()) { alert('请先粘贴报告文本'); return; }
+
+  const endpoint = document.getElementById('ai-endpoint').value.trim();
+  const apiKey = document.getElementById('ai-key').value.trim();
+  const model = document.getElementById('ai-model').value.trim();
+
+  if (!endpoint || !apiKey || !model) {
+    alert('请先在「AI 提取配置」中填写 endpoint、API key 和模型名');
+    return;
+  }
+
+  const btn = document.getElementById('ai-extract-btn');
+  btn.textContent = '⏳ AI 提取中...';
+  btn.disabled = true;
+
+  const sysPrompt = `你是数据资产评估报告解析助手。从报告文本中提取以下字段，严格输出JSON格式(无其他文字)：
+{"costData":数字或null,"costLabor":数字或null,"costEquip":数字或null,"flowCount":整数或null,"condCount":整数或null,"sceneLevel":"good|great|superb|null","reportVal":数字或null}
+单位统一为万元(遇到"元"自动除以10000)。场景等级：好=good,很好=great,特好=superb。无法确定的字段填null。`;
+
+  try {
+    const payload = JSON.stringify({
+      model: model,
+      messages: [
+        { role: 'system', content: sysPrompt },
+        { role: 'user', content: text.substring(0, 4000) }
+      ],
+      max_tokens: 600,
+      reasoning_effort: 'none'
+    });
+
+    const resp = await fetch(endpoint + '/chat/completions', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + apiKey, 'Content-Type': 'application/json' },
+      body: payload
+    });
+
+    if (!resp.ok) {
+      const errText = await resp.text();
+      throw new Error('HTTP ' + resp.status + ': ' + errText.substring(0, 200));
+    }
+
+    const data = await resp.json();
+    let content = data.choices[0].message.content.trim();
+
+    // Strip markdown code fences if present
+    content = content.replace(/^```json\s*/i, '').replace(/```\s*$/, '').trim();
+
+    const parsed = JSON.parse(content);
+
+    // Convert nulls and normalize
+    const result = {
+      costData: parsed.costData ?? null,
+      costLabor: parsed.costLabor ?? null,
+      costEquip: parsed.costEquip ?? null,
+      flowCount: parsed.flowCount ?? null,
+      condCount: parsed.condCount ?? null,
+      sceneLevel: parsed.sceneLevel ?? null,
+      reportVal: parsed.reportVal ?? null,
+    };
+
+    mapExtractToForm(result, 'AI语义提取');
+  } catch(e) {
+    alert('AI 提取失败：' + e.message);
+  } finally {
+    btn.textContent = '🤖 AI 语义提取（需 API）';
+    btn.disabled = false;
+  }
+}
+
+// --- Map extraction result to form fields ---
+function mapExtractToForm(data, source) {
+  showExtractResult();
+
+  if (data.costData !== null && data.costData !== undefined)
+    document.getElementById('ext-cost-data').value = round1(data.costData);
+  if (data.costLabor !== null && data.costLabor !== undefined)
+    document.getElementById('ext-cost-labor').value = round1(data.costLabor);
+  if (data.costEquip !== null && data.costEquip !== undefined)
+    document.getElementById('ext-cost-equip').value = round1(data.costEquip);
+  if (data.flowCount !== null && data.flowCount !== undefined)
+    document.getElementById('ext-flow').value = data.flowCount;
+  if (data.condCount !== null && data.condCount !== undefined)
+    document.getElementById('ext-cond').value = data.condCount;
+  if (data.sceneLevel) document.getElementById('ext-scene').value = data.sceneLevel;
+  if (data.reportVal !== null && data.reportVal !== undefined)
+    document.getElementById('ext-report-val').value = round1(data.reportVal);
+
+  // Count extracted fields
+  const total = 7;
+  let found = 0;
+  for (const v of Object.values(data)) { if (v !== null && v !== undefined) found++; }
+  document.getElementById('extract-verify').innerHTML =
+    `<div class="verify-warn">📋 来源：${source} | 提取 ${found}/${total} 个字段。请核对后点击「回填到估值模型并校验」</div>`;
+}
+
+function showExtractResult() {
+  document.getElementById('extract-result').style.display = 'block';
+  if (document.getElementById('paste-area').style.display === 'none') {
+    document.getElementById('paste-area').style.display = 'block';
+  }
+}
+
+// --- Apply extracted data to main form & verify ---
+function applyExtractToForm() {
+  const cd = parseFloat(document.getElementById('ext-cost-data').value) || 0;
+  const cl = parseFloat(document.getElementById('ext-cost-labor').value) || 0;
+  const ce = parseFloat(document.getElementById('ext-cost-equip').value) || 0;
+  const fc = parseInt(document.getElementById('ext-flow').value) || 1;
+  const cc = parseInt(document.getElementById('ext-cond').value) || 1;
+  const sl = document.getElementById('ext-scene').value || 'good';
+  const rv = parseFloat(document.getElementById('ext-report-val').value) || 0;
+
+  // Fill main form
+  document.getElementById('cost-data').value = cd;
+  document.getElementById('cost-labor').value = cl;
+  document.getElementById('cost-equip').value = ce;
+  document.getElementById('flow-count').value = fc;
+  document.getElementById('cond-count').value = cc;
+  document.getElementById('scene-level').value = sl;
+  document.getElementById('income-val').value = rv;
+
+  recalcB();
+  recalcC();
+  recalc();
+
+  // Compare: computed A vs report value
+  const v = getVals();
+  const a = v.data + v.labor + v.equip;
+  const computedA = calcA(a, v.equip, v.labor, v.b, v.c);
+
+  let verifyHtml = '';
+  if (rv > 0) {
+    const diff = Math.abs(computedA - rv);
+    const devPct = (diff / rv * 100).toFixed(1);
+    if (diff < 0.5) {
+      verifyHtml = `<div class="verify-ok">✅ 校验通过：本工具重算 ${round1(computedA)} 万 ≈ 报告估值 ${rv} 万（偏差 ${devPct}%），参数一致</div>`;
+    } else if (devPct <= 15) {
+      verifyHtml = `<div class="verify-warn">⚠️ 轻微偏差：本工具重算 ${round1(computedA)} 万 vs 报告 ${rv} 万（偏差 ${devPct}%），建议复核系数 b/c</div>`;
+    } else {
+      verifyHtml = `<div class="verify-fail">❌ 偏差较大：本工具重算 ${round1(computedA)} 万 vs 报告 ${rv} 万（偏差 ${devPct}%），参数或系数需重新审定</div>`;
+    }
+  } else {
+    verifyHtml = `<div class="verify-ok">✅ 已回填 ${round1(computedA)} 万元（未输入报告原估值，跳过比对）</div>`;
+  }
+
+  document.getElementById('extract-verify').innerHTML = verifyHtml;
+
+  // Scroll to result
+  document.getElementById('extract-verify').scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 
 // ====== Load default case ======
