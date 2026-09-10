@@ -5,6 +5,16 @@
 ![Version](https://img.shields.io/badge/version-1.4.0-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
+## Why this matters / 为什么做这个项目
+
+China is developing a new institutional framework for registering, valuing, and transacting data-related intellectual property. This project turns Deyang's local-government Data IP valuation framework into an open, reproducible valuation engine and explores how qualitative policy rules can be converted into transparent, calibratable valuation indicators.
+
+The project is designed not only to reproduce the published L1+L2+L3 framework, but also to test and extend it with real-world valuation cases. Current research focuses on decomposing subjective coefficients into explainable indicators, cross-validating valuation results, and introducing AI-assisted recommendations while preserving policy traceability and human review.
+
+中国正在探索数据知识产权登记、估值与交易制度。本项目将德阳市地方制度中的数据知识产权协商估值框架转化为开放、可复现的计算工具，并进一步研究如何将制度中的定性判断转化为透明、可校准的估值指标体系。
+
+项目不仅复现 L1+L2+L3 估值框架，还结合真实案例进行校准与交叉验证。目前重点研究加工难度、市场价值等主观系数的指标化拆解，以及在保持政策依据可追溯和人工复核的前提下，引入 AI 辅助评估。
+
 ## 📋 简介
 
 本工具为数据知识产权协商估值提供可视化计算引擎，完全基于德阳市制度原文实现，适用于：
@@ -47,7 +57,7 @@ xdg-open index.html
 
 ## 📦 预置数据
 
-内置 **98.8 万条** 真实案例数据，点击「加载真实案例」按钮即可快速填充参数。
+内置 **1 个标杆案例**（四川省人民医院 × 扬子江药业，**98.8 万元**），点击「加载真实案例」按钮即可快速填充参数。另可在「v1.4 精细评估」中载入 Manus 方案 10 个可比案例作旁证。
 
 ## ✨ v1.1 新功能：导出与二维码闭环
 
