@@ -348,7 +348,7 @@ input[type="range"] {
       <ul>
         <li>成本数据由权利方提供、双方共同审定</li>
         <li>收益法评估值来自中评协备案的资产评估机构报告，仅用于结果校验</li>
-        <li>点「加载真实案例」可一键填入省人民医院×扬子江（98.8万）全套参数作参照</li>
+        <li>点「加载真实案例」可一键填入某省级人民医院（复旦百强）×某国内龙头原研制药企业（98.8万）全套参数作参照</li>
       </ul>
 
       <h4>注意</h4>
@@ -361,7 +361,7 @@ input[type="range"] {
 
   <!-- Case button + export buttons -->
   <div class="btn-row">
-    <button class="btn-case" onclick="loadCase()">📋 加载真实案例：省人民医院×扬子江 (98.8万)</button>
+    <button class="btn-case" onclick="loadCase()">📋 加载真实案例：某省级人民医院（复旦百强）×某国内龙头原研制药企业 (98.8万)</button>
   </div>
 
   <!-- Export & QR toolbar -->
@@ -866,8 +866,8 @@ input[type="range"] {
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px 20px;font-size:13px;" id="summary">
       <div>📌 估值目的: <strong id="sum-purpose">转让/许可/入股/融资</strong></div>
       <div>📅 估值基准日: <strong id="sum-date">2025年12月02日</strong></div>
-      <div>🏥 权利方: <strong>四川省人民医院</strong></div>
-      <div>💊 相对方: <strong>扬子江药业集团</strong></div>
+      <div>🏥 权利方: <strong>某省级人民医院（复旦百强）</strong></div>
+      <div>💊 相对方: <strong>某国内龙头原研制药企业</strong></div>
       <div>📋 登记机关: <strong>四川省知识产权保护中心</strong></div>
       <div>🔢 登记证号: <strong>2025015116</strong></div>
       <div>📐 评估方法: <strong>成本法（协商估值）</strong></div>
@@ -1079,7 +1079,7 @@ function applyFineB() {
   recalc();
 }
 
-// v1.3 calibration demo: reproduce 省人民医院×扬子江 case b=1.4
+// v1.3 calibration demo: reproduce 某省级人民医院（复旦百强）×某国内龙头原研制药企业 case b=1.4
 // B1/B2 at 1.7 (flow 3-4, cond 4-6), B3-B5 at base 1.0 → b_raw=1.385 → roundHalfUp → 1.4
 function loadCalibration() {
   document.getElementById('flow-count').value = 4;
@@ -1280,7 +1280,7 @@ const DEFAULT_COMPARABLES = [
   {id:'C-07',source:'浙江大数据交易中心',product:'水暖阀门行业主数据标准',amount:1.0,amountType:'exact',industry:'数据治理',dataType:'ERP/MES主数据标准',scene:'数据治理',scarcity:'标准化基础产品',rightScope:'多客户',delivery:'报告',useCase:'数据治理',cNote:'与数据集类型不同匹配时下调相似度'},
   {id:'C-08',source:'宿迁/华东江苏大数据交易中心',product:'企业近一年行政处罚可视化分析数据',amount:8,amountType:'exact',industry:'政务/企业风控',dataType:'行政处罚分析',scene:'企业风控/合规',scarcity:'登记预评估后场内交易',rightScope:'多客户',delivery:'报告/API',useCase:'风控',cNote:'小规模合规风控数据中低档基准'},
   {id:'C-09',source:'上海数据交易所',product:'高速重点车辆/车流量/道路安全等11个产品',amount:100,amountType:'aggregate',industry:'交通数据与安全服务',dataType:'交通与安全多维度数据',scene:'交通管理/保险/导航',scarcity:'多产品组合强运营',rightScope:'多客户',delivery:'API/报告',useCase:'交通/保险',cNote:'交通组合服务中档旁证；约100万为3笔合计'},
-  {id:'C-10',source:'德阳/四川医疗数据知识产权',product:'省人民医院 × 扬子江',amount:98.8,amountType:'unverified_user_input',industry:'医疗健康',dataType:'待补',scene:'待补',scarcity:'可能存在较高合规门槛',rightScope:'待补',delivery:'待补',useCase:'医疗数据产品',cNote:'只用于本项目兼容性回归；未找到独立公开原始公告'}
+  {id:'C-10',source:'德阳/四川医疗数据知识产权',product:'某省级人民医院（复旦百强）×某国内龙头原研制药企业',amount:98.8,amountType:'unverified_user_input',industry:'医疗健康',dataType:'待补',scene:'待补',scarcity:'可能存在较高合规门槛',rightScope:'待补',delivery:'待补',useCase:'医疗数据产品',cNote:'只用于本项目兼容性回归；未找到独立公开原始公告'}
 ];
 
 function loadDefaultComparables() {
@@ -1497,8 +1497,8 @@ function exportReport() {
       <table>
         <tr><th>估值目的</th><td>${c.purpose}</td></tr>
         <tr><th>估值基准日</th><td>${c.date}</td></tr>
-        <tr><th>权利方</th><td>四川省人民医院</td></tr>
-        <tr><th>相对方</th><td>扬子江药业集团</td></tr>
+        <tr><th>权利方</th><td>某省级人民医院（复旦百强）</td></tr>
+        <tr><th>相对方</th><td>某国内龙头原研制药企业</td></tr>
         <tr><th>评估方法</th><td>成本法（协商估值）</td></tr>
       </table>
 
@@ -2037,7 +2037,7 @@ function loadCase() {
   // flash
   const btn = document.querySelector('.btn-case');
   btn.textContent = '✅ 已加载！';
-  setTimeout(()=>{ btn.textContent = '📋 加载真实案例：省人民医院×扬子江 (98.8万)'; }, 1500);
+  setTimeout(()=>{ btn.textContent = '📋 加载真实案例：某省级人民医院（复旦百强）×某国内龙头原研制药企业 (98.8万)'; }, 1500);
 }
 
 // Init
