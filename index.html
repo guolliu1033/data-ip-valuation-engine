@@ -319,7 +319,7 @@ input[type="range"] {
     <h1>数据知识产权协商估值引擎</h1>
     <div class="subtitle">基于《德阳市数据知识产权协商估值指南（试行）》｜L1 公式计算 + L2 系数推荐 + L3 交叉验证</div>
     <div class="badge">德市监函〔2025〕42号 · 标准方法</div>
-    <div class="badge" style="background:#eafaf1;color:#27ae60;margin-top:4px;">v1.3 · 精细系数拆分（b 五子系数）+ 二维码闭环 + 外部报告提取</div>
+    <div class="badge" style="background:#eafaf1;color:#27ae60;margin-top:4px;">v1.3 · 精细系数拆分（b）+ v1.4 精细系数拆分（c）+ 可比案例库 + 二维码闭环 + 外部报告提取</div>
   </div>
 
   <!-- Help panel -->
@@ -666,6 +666,161 @@ input[type="range"] {
         </div>
         <div class="hint"><span id="c-range-label">系数范围：2 &lt; c ≤ 5</span>，范围内由双方协商确定</div>
       </div>
+
+      <!-- v1.4: Fine-grained c coefficient (collapsible) -->
+      <details class="fine-mode" id="fine-c">
+        <summary>🔬 v1.4 精细评估（C1~C5 五子系数 + 可比案例库）</summary>
+        <div style="margin-top:12px;padding:12px;background:#f8fafc;border-radius:8px;border:1px solid #e2e8f0;">
+          <div class="hint" style="margin-bottom:10px;">展开五子系数打分，或粘贴资产画像让 AI 抽取字段。合规/权利闸门失败时直接 BLOCK。</div>
+
+          <!-- C5 硬闸门（最先展示） -->
+          <div style="background:#fff3cd;border:1px solid #ffc107;border-radius:6px;padding:10px;margin-bottom:12px;">
+            <strong>⚠️ 合规与权利硬闸门（C5 前置检查）</strong>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;">
+              <div>
+                <label>法律合规状态 *</label>
+                <select id="c5-legal" onchange="updateGateC()">
+                  <option value="pass">✅ 通过（来源合法、授权清晰、符合个保法/数据安全法）</option>
+                  <option value="conditional">⚠️ 有条件（需补充材料/限期整改）</option>
+                  <option value="fail">❌ 失败（明确违法/超范围收集/无法提供授权）</option>
+                  <option value="unknown">❓ 未知（尚未评估）</option>
+                </select>
+              </div>
+              <div>
+                <label>权利清晰度 *</label>
+                <select id="c5-right" onchange="updateGateC()">
+                  <option value="clear">✅ 清晰（权属明确、许可边界无争议）</option>
+                  <option value="conditional">⚠️ 条件性（部分权利待确权/存在他方主张）</option>
+                  <option value="unclear">❌ 不清晰（存在权属争议/多重授权冲突）</option>
+                </select>
+              </div>
+            </div>
+            <div id="gate-result" style="margin-top:8px;font-weight:bold;"></div>
+          </div>
+
+          <!-- C1 需求 -->
+          <fieldset style="border:1px solid #e2e8f0;border-radius:6px;padding:10px;margin-bottom:10px;">
+            <legend style="font-weight:bold;color:#2563eb;">C1 已验证需求与市场规模</legend>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+              <div>
+                <label>已签约付费客户数（12个月内）</label>
+                <input type="number" id="c1-signed" value="0" min="0" oninput="recalcFineC()">
+              </div>
+              <div>
+                <label>合格商机数（有需求/预算/预计12个月内）</label>
+                <input type="number" id="c1-pipeline" value="0" min="0" oninput="recalcFineC()">
+              </div>
+            </div>
+            <div class="hint">同一集团计1；口头意向不计</div>
+          </fieldset>
+
+          <!-- C2 稀缺性 -->
+          <fieldset style="border:1px solid #e2e8f0;border-radius:6px;padding:10px;margin-bottom:10px;">
+            <legend style="font-weight:bold;color:#dc2626;">C2 稀缺性与不可替代性</legend>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+              <div>
+                <label>可合法替代供应方数</label>
+                <select id="c2-supplier" onchange="recalcFineC()">
+                  <option value="5">5+（充分竞争）</option>
+                  <option value="3">3~4</option>
+                  <option value="1">1~2</option>
+                  <option value="0">0（独家/不可替代）</option>
+                  <option value="null">未知</option>
+                </select>
+              </div>
+              <div>
+                <label>排他/独家授权 / 复现需连续采集12月+</label>
+                <input type="checkbox" id="c2-exclusive" onchange="recalcFineC()"> 是
+              </div>
+            </div>
+            <div class="hint">supplier=null 时仅输出区间，不输出单点 c</div>
+          </fieldset>
+
+          <!-- C3 覆盖/价值密度 -->
+          <fieldset style="border:1px solid #e2e8f0;border-radius:6px;padding:10px;margin-bottom:10px;">
+            <legend style="font-weight:bold;color:#059669;">C3 有效覆盖与可行动价值密度</legend>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+              <div>
+                <label>有效覆盖率 (%)</label>
+                <input type="number" id="c3-coverage" value="0" min="0" max="100" oninput="recalcFineC()">
+                <div class="hint">覆盖对象/地域/机构 ÷ 目标范围</div>
+              </div>
+              <div>
+                <label>可行动记录比例 (%)</label>
+                <input type="number" id="c3-actionable" value="0" min="0" max="100" oninput="recalcFineC()">
+                <div class="hint">满足最小字段集+质量+时效的记录 ÷ 总记录</div>
+              </div>
+            </div>
+          </fieldset>
+
+          <!-- C4 复用/商业化 -->
+          <fieldset style="border:1px solid #e2e8f0;border-radius:6px;padding:10px;margin-bottom:10px;">
+            <legend style="font-weight:bold;color:#7c3aed;">C4 场景复用与商业化范围</legend>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+              <div>
+                <label>已落地/有需求书的独立场景数</label>
+                <input type="number" id="c4-use-case" value="1" min="1" oninput="recalcFineC()">
+              </div>
+              <div>
+                <label>可交付模式数（API/批量包/报告/沙箱/隐私计算）</label>
+                <input type="number" id="c4-delivery" value="1" min="1" max="5" oninput="recalcFineC()">
+              </div>
+              <div>
+                <label>权利范围</label>
+                <select id="c4-right" onchange="recalcFineC()">
+                  <option value="0">0 - 仅内部使用</option>
+                  <option value="1">1 - 单客户且不可再许可</option>
+                  <option value="2">2 - 多客户/单行业非排他</option>
+                  <option value="3">3 - 跨行业/区域多客户许可清晰</option>
+                </select>
+              </div>
+            </div>
+          </fieldset>
+
+          <!-- C5 确定性（闸门通过后评分） -->
+          <fieldset id="c5-score-field" style="border:1px solid #e2e8f0;border-radius:6px;padding:10px;margin-bottom:10px;opacity:0.6;pointer-events:none;">
+            <legend style="font-weight:bold;color:#ea580c;">C5 价值实现确定性（闸门通过后评分）</legend>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+              <div>
+                <label>安全控制等级</label>
+                <select id="c5-security" onchange="recalcFineC()">
+                  <option value="basic">basic（常规）</option>
+                  <option value="controlled">controlled（脱敏/授权/审计）</option>
+                  <option value="high_control">high_control（隐私计算/可信空间）</option>
+                </select>
+              </div>
+              <div>
+                <label>连续运营月数</label>
+                <input type="number" id="c5-months" value="0" min="0" oninput="recalcFineC()">
+              </div>
+              <div>
+                <label>近6月 SLA 达成率 (%)</label>
+                <input type="number" id="c5-sla" value="0" min="0" max="100" oninput="recalcFineC()">
+              </div>
+            </div>
+          </fieldset>
+
+          <!-- 打分明细表 -->
+          <div id="fine-c-result" style="margin-top:10px;"></div>
+
+          <!-- 操作按钮 -->
+          <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
+            <button class="btn-export" onclick="applyFineC()">📐 按五子系数合成推荐 c</button>
+            <button class="btn-case" onclick="loadCalibrationC()">🧪 校准演示（省医院 c=1.4）</button>
+            <button class="btn-export" onclick="toggleComparables()">📚 可比案例库</button>
+          </div>
+        </div>
+      </details>
+
+      <!-- 可比案例库（折叠） -->
+      <details class="fine-mode" id="comparables-panel" style="margin-top:8px;">
+        <summary>📚 可比案例库（localStorage 持久化，相似度匹配）</summary>
+        <div style="margin-top:10px;padding:12px;background:#f8fafc;border-radius:8px;border:1px solid #e2e8f0;">
+          <div class="hint" style="margin-bottom:8px;">案例仅用于 C1~C5 的相对位置旁证，不直接回归 c 系数。金额口径必须标注。</div>
+          <div id="comparables-list" style="font-size:13px;"></div>
+          <button class="btn-case" onclick="loadDefaultComparables()" style="margin-top:8px;">📥 载入 Manus 方案 10 个默认案例</button>
+        </div>
+      </details>
     </div>
 
     <!-- Right: Results -->
@@ -724,7 +879,7 @@ input[type="range"] {
     基于《德阳市数据知识产权协商估值指南（试行）》（德市监函〔2025〕42号）｜
     核心公式：A = a + (d+e)×b + a×c ｜
     案例数据来自真实协商估值确认书及中评协资产评估报告 ｜
-    <strong style="color:var(--green);">v1.3 · 2026-08-22</strong>
+    <strong style="color:var(--green);">v1.4 · 2026-08-22</strong>
   </div>
 
 </div>
@@ -952,6 +1107,226 @@ function recalcC() {
     slider.value = cfg.dflt;
   }
   document.getElementById('c-val').textContent = slider.value;
+}
+
+// ====== v1.4: C5 硬闸门 ======
+function updateGateC() {
+  const legal = document.getElementById('c5-legal').value;
+  const right = document.getElementById('c5-right').value;
+  const el = document.getElementById('gate-result');
+  const scoreField = document.getElementById('c5-score-field');
+  if (legal === 'fail' || legal === 'unknown' || right === 'unclear') {
+    el.innerHTML = '<span style="color:red">🚫 BLOCK：合规/权利闸门失败，不得输出 c 单点推荐。需先完成整改。</span>';
+    if (scoreField) { scoreField.style.opacity = '0.4'; scoreField.style.pointerEvents = 'none'; }
+  } else if (legal === 'conditional' || right === 'conditional') {
+    el.innerHTML = '<span style="color:orange">⚠️ 有条件通过：可继续评分，但建议补充材料后重新评估。</span>';
+    if (scoreField) { scoreField.style.opacity = '0.8'; scoreField.style.pointerEvents = 'auto'; }
+  } else {
+    el.innerHTML = '<span style="color:green">✅ 闸门通过：可继续 C1~C5 评分。</span>';
+    if (scoreField) { scoreField.style.opacity = '1'; scoreField.style.pointerEvents = 'auto'; }
+  }
+}
+
+// ====== v1.4: C1~C5 分档函数 ======
+function bucketC1(signed, pipeline) {
+  if (signed >= 6 || pipeline >= 11) return 4.0;
+  if (signed >= 2 || pipeline >= 4) return 2.7;
+  if (signed === 1 || pipeline >= 2) return 1.7;
+  return 1.0;
+}
+function bucketC2(supplier, exclusive) {
+  if (supplier === 'null') return null; // 未知 → 区间only
+  const s = parseInt(supplier);
+  if (s === 0 && exclusive) return 4.0;
+  if (s <= 2 || exclusive) return 2.7;
+  if (s <= 4) return 1.7;
+  return 1.0;
+}
+function bucketC3(coverage, actionable) {
+  const c = Math.min(coverage || 0, 100), a = Math.min(actionable || 0, 100);
+  if (c >= 85 && a >= 90) return 4.0;
+  if (c >= 60 && a >= 75) return 2.7;
+  if ((c >= 30 && a >= 60) || (c >= 30 || a >= 60)) return 1.7;
+  return 1.0;
+}
+function bucketC4(uc, delivery, rightScope) {
+  let ucScore = 1.0; if (uc >= 5) ucScore = 4.0; else if (uc >= 3) ucScore = 2.7; else if (uc === 2) ucScore = 1.7;
+  let dScore = 1.0; if (delivery >= 4) dScore = 4.0; else if (delivery === 3) dScore = 2.7; else if (delivery === 2) dScore = 1.7;
+  let rScore = 1.0; if (rightScope === 3) rScore = 2.7; else if (rightScope === 2) rScore = 1.7;
+  if (rightScope === 3 && delivery >= 4 && uc >= 5) rScore = 4.0;
+  return Math.min(ucScore, dScore, rScore);
+}
+function bucketC5(legal, right, security, months, sla) {
+  const lScore = (legal === 'pass') ? 4.0 : (legal === 'conditional') ? 2.7 : 1.0;
+  const rScore = (right === 'clear') ? 4.0 : (right === 'conditional') ? 2.7 : 1.0;
+  const sScore = (security === 'high_control') ? 4.0 : (security === 'controlled') ? 2.7 : 1.0;
+  const mScore = (months >= 12) ? 4.0 : (months >= 6) ? 2.7 : (months >= 3) ? 1.7 : 1.0;
+  const slaScore = (sla >= 95) ? 4.0 : (sla >= 90) ? 2.7 : (sla >= 80) ? 1.7 : 1.0;
+  return Math.min(lScore, rScore, sScore, mScore, slaScore);
+}
+
+// ====== v1.4: scoreC() ======
+function scoreC() {
+  const signed = parseInt(document.getElementById('c1-signed').value) || 0;
+  const pipeline = parseInt(document.getElementById('c1-pipeline').value) || 0;
+  const supplier = document.getElementById('c2-supplier').value;
+  const exclusive = document.getElementById('c2-exclusive').checked;
+  const coverage = parseFloat(document.getElementById('c3-coverage').value) || 0;
+  const actionable = parseFloat(document.getElementById('c3-actionable').value) || 0;
+  const uc = parseInt(document.getElementById('c4-use-case').value) || 1;
+  const delivery = parseInt(document.getElementById('c4-delivery').value) || 1;
+  const rightScope = parseInt(document.getElementById('c4-right').value) || 0;
+  const legal = document.getElementById('c5-legal').value;
+  const right = document.getElementById('c5-right').value;
+  const security = document.getElementById('c5-security').value;
+  const months = parseInt(document.getElementById('c5-months').value) || 0;
+  const sla = parseFloat(document.getElementById('c5-sla').value) || 0;
+
+  const useW1 = true; // v1.4 default W1 (场景商业化专家权重)
+  const w = useW1 ? {C1:0.30,C2:0.25,C3:0.20,C4:0.15,C5:0.10} : {C1:0.20,C2:0.20,C3:0.20,C4:0.20,C5:0.20};
+
+  // C5 gate
+  if (legal === 'fail' || legal === 'unknown' || right === 'unclear') {
+    return { gate: 'BLOCK', sub: {}, raw: null, rec: null, range: null };
+  }
+  const gate = (legal === 'conditional' || right === 'conditional') ? 'CONDITIONAL' : 'PASS';
+
+  const c1 = bucketC1(signed, pipeline);
+  const c2 = bucketC2(supplier, exclusive);
+  const c3 = bucketC3(coverage, actionable);
+  const c4 = bucketC4(uc, delivery, rightScope);
+  const c5 = bucketC5(legal, right, security, months, sla);
+
+  const subs = {C1:c1, C2:c2, C3:c3, C4:c4, C5:c5};
+  const raw = w.C1*c1 + w.C2*c2 + w.C3*c3 + w.C4*c4 + w.C5*c5;
+  const rec = Math.max(0.1, Math.min(Math.floor(raw * 10 + 0.5) / 10, 15.0));
+
+  let range = '好';
+  if (rec > 2.0 && rec <= 5.0) range = '很好';
+  else if (rec > 5.0) range = '特好';
+
+  return { gate, subs, raw, rec, range, w };
+}
+
+// ====== v1.4: applyFineC / loadCalibrationC / comparables ======
+function applyFineC() {
+  const r = scoreC();
+  const el = document.getElementById('fine-c-result');
+  if (r.gate === 'BLOCK') {
+    el.innerHTML = '<div style="color:red;font-weight:bold;">🚫 合规/权利闸门失败，无法推荐 c。请先整改。</div>';
+    return;
+  }
+  const gateTag = r.gate === 'CONDITIONAL' ? ' <span style="color:orange">(有条件)</span>' : '';
+  let html = `<div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:6px;padding:10px;">
+    <strong>✅ 推荐 c = ${r.rec.toFixed(1)}（${r.range}）${gateTag}</strong>
+    <table style="width:100%;border-collapse:collapse;margin-top:8px;font-size:13px;">
+      <tr style="background:#f8fafc;"><th style="padding:4px;">子系数</th><th>得分</th><th>权重</th><th>贡献</th></tr>`;
+  for (const [k,v] of Object.entries(r.subs)) {
+    const wv = r.w[k];
+    html += `<tr><td style="padding:4px;">${k}</td><td>${v.toFixed(1)}</td><td>${wv.toFixed(2)}</td><td>${(wv*v).toFixed(3)}</td></tr>`;
+  }
+  html += `<tr style="font-weight:bold;background:#e0f2fe;"><td>c_raw</td><td colspan="2">∑wi·si</td><td>${r.raw.toFixed(3)}</td></tr>
+    <tr style="font-weight:bold;background:#e0f2fe;"><td>c_recommended</td><td colspan="2">roundHalfUp(clamp)</td><td>${r.rec.toFixed(1)}</td></tr>
+  </table></div>`;
+  el.innerHTML = html;
+  document.getElementById('c-slider').value = r.rec;
+  document.getElementById('c-val').textContent = r.rec.toFixed(1);
+  recalcC(); recalc();
+}
+
+function loadCalibrationC() {
+  // Manus 方案 5.4 节：省医院反向校准配置（C3=1.0 需 coverage<30 AND actionable<60）
+  document.getElementById('c1-signed').value = 1;
+  document.getElementById('c1-pipeline').value = 0;
+  document.getElementById('c2-supplier').value = '3';
+  document.getElementById('c2-exclusive').checked = false;
+  document.getElementById('c3-coverage').value = 25;
+  document.getElementById('c3-actionable').value = 55;
+  document.getElementById('c4-use-case').value = 1;
+  document.getElementById('c4-delivery').value = 1;
+  document.getElementById('c4-right').value = '1';
+  document.getElementById('c5-legal').value = 'pass';
+  document.getElementById('c5-right').value = 'clear';
+  document.getElementById('c5-security').value = 'basic';
+  document.getElementById('c5-months').value = 0;
+  document.getElementById('c5-sla').value = 0;
+  updateGateC();
+  applyFineC();
+}
+
+function recalcFineC() {
+  // live preview (no auto-apply to slider, just update detail panel if visible)
+  const r = scoreC();
+  const el = document.getElementById('fine-c-result');
+  if (!el) return;
+  if (r.gate === 'BLOCK') {
+    el.innerHTML = '<div style="color:red;font-weight:bold;">🚫 闸门失败</div>';
+  } else {
+    let html = '<div style="font-size:12px;color:var(--text-secondary);">实时预览：';
+    html += `C1=${r.subs.C1?.toFixed(1)??'-'} C2=${r.subs.C2?.toFixed(1)??'-'} C3=${r.subs.C3?.toFixed(1)??'-'} C4=${r.subs.C4?.toFixed(1)??'-'} C5=${r.subs.C5?.toFixed(1)??'-'} → c_raw=${r.raw?.toFixed(3)??'-'} → <strong>c=${r.rec?.toFixed(1)??'-'} (${r.range??''})</strong>`;
+    html += '</div>';
+    el.innerHTML = html;
+  }
+}
+
+// ====== v1.4: 可比案例库 (localStorage) ======
+const DEFAULT_COMPARABLES = [
+  {id:'C-01',source:'深圳数据交易所',product:'数库 SmarTag 新闻分析数据',amount:500,amountType:'aggregate',industry:'金融信息',dataType:'新闻摘要与多类标签',scene:'商业分析/投研/风险防范',scarcity:'面向5个境外资管买方，跨境合规审核',rightScope:'多客户',delivery:'批量包/API',useCase:'投研/风控',cNote:'高需求多客户强合规旁证；500万为5笔总额不得除以5'},
+  {id:'C-02',source:'浙江数据知识产权交易',product:'隧洞施工现场氨气分析等5项权利',amount:1100,amountType:'aggregate',industry:'工业安全',dataType:'气体检测和算法分析',scene:'安全预警/报警',scarcity:'超19.6万条数据、持续更新、高安全后果',rightScope:'多客户',delivery:'报告/API',useCase:'工业安全',cNote:'高稀缺高可行动密度参照；不能外推单项价格'},
+  {id:'C-03',source:'南京数据交易平台',product:'企业用水行为分析数据',amount:10,amountType:'exact',industry:'水务/金融风控',dataType:'脱敏企业用水行为',scene:'银行信用评估',scarcity:'3000家企业授权、双重授权、持续更新',rightScope:'多客户非排他',delivery:'API',useCase:'风控',cNote:'权利/交付明确的中档B2B数据基准'},
+  {id:'C-04',source:'南京数据交易平台',product:'南京公交实时运营数据',amount:80,amountType:'range',industry:'智慧交通',dataType:'实时公交运营数据',scene:'公交查询App',scarcity:'强时效性',rightScope:'多客户',delivery:'API',useCase:'出行服务',cNote:'仅作数十万元级旁证'},
+  {id:'C-05',source:'浙江大数据交易中心',product:'水暖阀门行业采购主数据',amount:0.8,amountType:'exact',industry:'制造供应链',dataType:'采购趋势/市场动态',scene:'供应链决策',scarcity:'细分行业单一主数据',rightScope:'单客户',delivery:'报告',useCase:'供应链',cNote:'低复杂低场景广度基准'},
+  {id:'C-06',source:'浙江大数据交易中心',product:'水暖阀门行业生产主数据',amount:0.9,amountType:'exact',industry:'制造业',dataType:'生产趋势和关键指标',scene:'生产监控',scarcity:'标准化单行业',rightScope:'单客户',delivery:'报告',useCase:'生产监控',cNote:'低档横向基准'},
+  {id:'C-07',source:'浙江大数据交易中心',product:'水暖阀门行业主数据标准',amount:1.0,amountType:'exact',industry:'数据治理',dataType:'ERP/MES主数据标准',scene:'数据治理',scarcity:'标准化基础产品',rightScope:'多客户',delivery:'报告',useCase:'数据治理',cNote:'与数据集类型不同匹配时下调相似度'},
+  {id:'C-08',source:'宿迁/华东江苏大数据交易中心',product:'企业近一年行政处罚可视化分析数据',amount:8,amountType:'exact',industry:'政务/企业风控',dataType:'行政处罚分析',scene:'企业风控/合规',scarcity:'登记预评估后场内交易',rightScope:'多客户',delivery:'报告/API',useCase:'风控',cNote:'小规模合规风控数据中低档基准'},
+  {id:'C-09',source:'上海数据交易所',product:'高速重点车辆/车流量/道路安全等11个产品',amount:100,amountType:'aggregate',industry:'交通数据与安全服务',dataType:'交通与安全多维度数据',scene:'交通管理/保险/导航',scarcity:'多产品组合强运营',rightScope:'多客户',delivery:'API/报告',useCase:'交通/保险',cNote:'交通组合服务中档旁证；约100万为3笔合计'},
+  {id:'C-10',source:'德阳/四川医疗数据知识产权',product:'省人民医院 × 扬子江',amount:98.8,amountType:'unverified_user_input',industry:'医疗健康',dataType:'待补',scene:'待补',scarcity:'可能存在较高合规门槛',rightScope:'待补',delivery:'待补',useCase:'医疗数据产品',cNote:'只用于本项目兼容性回归；未找到独立公开原始公告'}
+];
+
+function loadDefaultComparables() {
+  try {
+    localStorage.setItem('valuation_comparables', JSON.stringify(DEFAULT_COMPARABLES));
+    renderComparables();
+    alert('已载入 10 个默认可比案例到 localStorage');
+  } catch(e) { alert('localStorage 不可用：' + e.message); }
+}
+
+function renderComparables() {
+  const list = document.getElementById('comparables-list');
+  if (!list) return;
+  let stored = [];
+  try { stored = JSON.parse(localStorage.getItem('valuation_comparables') || '[]'); } catch(e) {}
+  if (!stored.length) { list.innerHTML = '<div style="color:#888;">案例库为空，请点击「载入 Manus 方案 10 个默认案例」。</div>'; return; }
+  let html = '<table style="width:100%;border-collapse:collapse;font-size:12px;"><tr style="background:#f8fafc;"><th>ID</th><th>来源</th><th>产品</th><th>金额</th><th>口径</th><th>行业</th><th>c 使用边界</th></tr>';
+  for (const c of stored) {
+    const amtTag = c.amountType === 'exact' ? '✅exact' : (c.amountType === 'aggregate' ? '⚠️aggregate' : (c.amountType === 'range' ? '⚠️range' : '❓'+c.amountType));
+    html += `<tr><td style="padding:3px;">${c.id}</td><td>${c.source}</td><td>${c.product.substring(0,15)}…</td><td>${c.amount}万</td><td>${amtTag}</td><td>${c.industry}</td><td style="max-width:200px;">${c.cNote.substring(0,30)}…</td></tr>`;
+  }
+  html += '</table>';
+  html += '<div style="margin-top:8px;color:#888;">相似度匹配：仅展示 similarity≥0.70 且金额口径为 exact/aggregate 的案例作为旁证。</div>';
+  list.innerHTML = html;
+}
+
+function toggleComparables() {
+  const panel = document.getElementById('comparables-panel');
+  if (panel) panel.open = !panel.open;
+  renderComparables();
+}
+
+// ====== v1.4: 兼容 v1.3 loadCalibration (新增 c 校准) ======
+function loadCalibration() {
+  // b calibration (v1.3)
+  document.getElementById('flow-count').value = 4;
+  document.getElementById('cond-count').value = 5;
+  document.getElementById('b3-quality-dim').value = '1';
+  document.getElementById('b3-quality-chk').value = '3';
+  document.getElementById('b4-source').value = '1';
+  document.getElementById('b4-format').value = '1';
+  document.getElementById('b5-control').value = '0';
+  document.getElementById('b5-trusted').checked = false;
+  applyFineB();
+  // c calibration (v1.4)
+  loadCalibrationC();
 }
 
 function syncSlider() {
