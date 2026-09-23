@@ -5,6 +5,8 @@
 ![Version](https://img.shields.io/badge/version-1.4.0-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
+[中文说明](README.md) | [English Documentation (README_EN.md)](README_EN.md)
+
 ## Why this matters / 为什么做这个项目
 
 China is developing a new institutional framework for registering, valuing, and transacting data-related intellectual property. This project turns Deyang's local-government Data IP valuation framework into an open, reproducible valuation engine and explores how qualitative policy rules can be converted into transparent, calibratable valuation indicators.
